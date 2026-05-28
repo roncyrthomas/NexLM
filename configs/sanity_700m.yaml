@@ -1,0 +1,36 @@
+# M1b — reduced-scope 700M sanity run on FineWeb-Edu.
+# Goal: prove the production 700M shape trains stably on real data.
+# Single A100 80GB, ~$3-4 of cloud time.
+#
+# Differs from blueprint's "5B token" full sanity (which would be ~$30+
+# on single A100). This is a budget-safe ~50M-token sanity that still
+# answers the load-bearing question: "does the 700M shape descend loss?"
+
+model:
+  shape: production_700m
+
+training:
+  data: fineweb-edu          # was tinystories in M1a
+  batch_size: 4              # 700M model + 2k ctx fits ~30GB on 80GB A100
+  grad_accum: 2              # effective batch 8
+  max_steps: 6000            # ~6000 * 4 * 2048 = ~49M tokens
+  lr: 3.0e-4
+  lr_schedule: cosine
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+  bf16: true
+  compile: false
+  gradient_checkpointing: true   # NEW for M1b: required to fit on single A100
+
+eval:
+  val_every: 1000
+  val_steps: 20
+  save_every: 2000
+  target_val_loss: 4.0       # loose — sanity just needs descent, not convergence
+
+logging:
+  wandb_project: frankenstein-700m-sanity
+  log_every: 25
+
+output_dir: out/sanity_700m

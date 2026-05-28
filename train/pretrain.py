@@ -18,7 +18,7 @@ from pathlib import Path
 import torch
 import yaml
 
-from data.streaming import build_tinystories_loader
+from data.streaming import build_loader
 from model.backbone import Frankenstein
 from model.config import ModelConfig
 
@@ -86,15 +86,28 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
     print(f"[init] model: {shape}, {n_params:,} params, dtype={dtype}, device={device}")
 
+    # gradient checkpointing — required to fit 700M on a single A100
+    if cfg_yaml["training"].get("gradient_checkpointing"):
+        print("[init] gradient checkpointing enabled")
+        from torch.utils.checkpoint import checkpoint as _ckpt
+        for layer in model.layers:
+            orig_forward = layer.forward
+            layer.forward = (lambda fwd: lambda x, **kw: _ckpt(fwd, x, use_reentrant=False, **kw))(orig_forward)
+
     if cfg_yaml["training"].get("compile") and device == "cuda":
         print("[init] torch.compile enabled")
         model = torch.compile(model, mode="max-autotune")
 
     # data
     bs = cfg_yaml["training"]["batch_size"]
-    seq = model_cfg.max_seq_len
-    train_loader = build_tinystories_loader("train", seq, bs, seed=0, device=device)
-    val_loader = build_tinystories_loader("validation", seq, bs, seed=1, device=device)
+    grad_accum = int(cfg_yaml["training"].get("grad_accum", 1))
+    # for 700M sanity the config overrides seq_len; for smoke we use model's default
+    seq = int(cfg_yaml["training"].get("seq_len", model_cfg.max_seq_len))
+    data_name = cfg_yaml["training"].get("data", "tinystories")
+    print(f"[data] backend={data_name} batch={bs} grad_accum={grad_accum} seq={seq}")
+    train_loader = build_loader(data_name, split="train", seq_len=seq, batch_size=bs, seed=0, device=device)
+    val_split = "validation" if data_name in ("tinystories", "tiny_stories") else "train"
+    val_loader = build_loader(data_name, split=val_split, seq_len=seq, batch_size=bs, seed=1, device=device)
 
     # optimizer
     base_lr = float(cfg_yaml["training"]["lr"])
@@ -136,25 +149,31 @@ def main():
     running_loss = 0.0
 
     while step < max_steps:
-        x, y = next(train_loader)
         lr = get_lr(step, max_steps, warmup, base_lr)
         for g in opt.param_groups:
             g["lr"] = lr
 
-        _, loss = model(x, targets=y)
-        loss.backward()
+        # gradient accumulation: grad_accum micro-batches per optimizer step
+        accum_loss = 0.0
+        for _ in range(grad_accum):
+            x, y = next(train_loader)
+            _, loss = model(x, targets=y)
+            (loss / grad_accum).backward()
+            accum_loss += loss.item()
+        accum_loss /= grad_accum
+
         torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
         opt.step()
         opt.zero_grad(set_to_none=True)
 
-        running_loss += loss.item()
+        running_loss += accum_loss
         step += 1
 
         if step % log_every == 0:
             avg = running_loss / log_every
             running_loss = 0.0
             elapsed = time.time() - t0
-            toks = step * bs * seq
+            toks = step * bs * seq * grad_accum
             tps = toks / elapsed
             print(f"step {step}/{max_steps} | loss {avg:.4f} | lr {lr:.2e} | {tps:.0f} tok/s | {elapsed:.0f}s")
             if args.wandb:
