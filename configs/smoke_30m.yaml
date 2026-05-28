@@ -1,0 +1,28 @@
+# M1a smoke training config — 30M param hybrid on TinyStories
+model:
+  shape: smoke_30m  # uses ModelConfig.smoke_30m()
+
+training:
+  data: tinystories
+  batch_size: 32
+  grad_accum: 1
+  max_steps: 30000
+  lr: 3.0e-4
+  lr_schedule: cosine
+  warmup_steps: 1000
+  weight_decay: 0.1
+  grad_clip: 1.0
+  bf16: true
+  compile: false  # turn on for cloud A100 run
+
+eval:
+  val_every: 1000
+  val_steps: 50
+  save_every: 5000
+  target_val_loss: 2.0  # M1a exit criterion
+
+logging:
+  wandb_project: frankenstein-smoke
+  log_every: 50
+
+output_dir: out/smoke_30m

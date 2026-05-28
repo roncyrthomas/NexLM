@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Venv (do NOT commit — 1.9 GB of Windows wheels)
+.venv/
+venv/
+env/
+
+# Training outputs (do NOT commit — checkpoints can be 100s of MB)
+out/
+_archive/
+wandb/
+*.pt
+*.safetensors
+*.bin
+*.ckpt
+
+# HuggingFace cache (do NOT commit — multi-GB)
+.cache/
+.huggingface/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Secrets — never commit
+.env
+.env.*
+*.key
+*.pem
+wandb_api_key*

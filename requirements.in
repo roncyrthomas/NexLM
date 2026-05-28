@@ -1,0 +1,30 @@
+# Frankenstein SLM dependencies (M1a)
+# PyTorch installed separately from cu130 index for Blackwell sm_120 support.
+# Reinstall via: pip install torch --index-url https://download.pytorch.org/whl/cu130
+
+# Core ML
+transformers>=5.0
+datasets>=4.0
+accelerate>=1.0
+safetensors>=0.6
+sentencepiece>=0.2
+tokenizers>=0.22
+
+# Numerics
+numpy>=2.0
+einops>=0.8
+
+# Logging & infra
+wandb>=0.27
+tqdm>=4.65
+pyyaml>=6.0
+
+# Testing
+pytest>=9.0
+pytest-xdist>=3.5
+
+# NOTES:
+# - mamba-ssm and causal-conv1d intentionally omitted (Windows incompatible);
+#   transformers.models.mamba2.Mamba2Mixer provides a pure-PyTorch fallback.
+#   On Linux/cloud they will be added back and the fast CUDA kernel activates
+#   automatically. No code change required in our backbone.

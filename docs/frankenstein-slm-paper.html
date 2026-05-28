@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tri-Memory Neuromodulation: A 700M Hybrid SSM Frankenstein</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fdfcf8;
+    --accent: #8b1e1e;
+    --accent-soft: #c97a7a;
+    --rule: #d4cfc4;
+    --soft: #5a5a5a;
+    --code-bg: #f4f1ea;
+    --pro: #2d5a3d;
+    --con: #8b3a1e;
+    --gold: #b8893a;
+    --tier0: #c97a7a;
+    --tier1: #8b8d3a;
+    --tier2: #3a6b8b;
+    --tier3: #6b4a8b;
+    --ssm: #3a6b8b;
+    --attn: #8b1e1e;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+    background: var(--paper);
+    color: var(--ink);
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 3em 1.5em 6em;
+    line-height: 1.7;
+    text-align: justify;
+    hyphens: auto;
+  }
+  header.titleblock {
+    text-align: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2em;
+    margin-bottom: 3em;
+  }
+  h1.papertitle {
+    font-size: 2.1em;
+    line-height: 1.25;
+    margin: 0 0 0.4em;
+    letter-spacing: -0.01em;
+    text-align: center;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-style: italic;
+    color: var(--soft);
+    font-size: 1.1em;
+    text-align: center;
+    margin-bottom: 1.2em;
+  }
+  .authorline {
+    text-align: center;
+    font-size: 0.95em;
+    color: var(--soft);
+  }
+  .authorline strong { color: var(--ink); }
+  .abstract {
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent);
+    padding: 1.5em 1.8em;
+    margin: 2.5em 0;
+    font-size: 0.96em;
+    text-align: justify;
+  }
+  .abstract h3 {
+    margin-top: 0;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    font-size: 1em;
+  }
+  h2 {
+    font-size: 1.55em;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.3em;
+    margin-top: 3em;
+    margin-bottom: 0.8em;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  h2::before {
+    content: counter(section) ". ";
+    counter-increment: section;
+    color: var(--accent);
+    font-weight: bold;
+  }
+  body { counter-reset: section; }
+  h3 {
+    font-size: 1.2em;
+    margin-top: 2em;
+    margin-bottom: 0.4em;
+    color: var(--ink);
+    font-style: italic;
+  }
+  h4 {
+    font-size: 1.02em;
+    margin-top: 1.5em;
+    margin-bottom: 0.3em;
+    color: var(--accent);
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+  }
+  p { margin: 0.8em 0; }
+  blockquote {
+    border-left: 3px solid var(--accent-soft);
+    padding: 0.4em 1.2em;
+    margin: 1.2em 0;
+    color: var(--soft);
+    font-style: italic;
+  }
+  code {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    font-size: 0.88em;
+    color: var(--ink);
+  }
+  pre {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    border-left: 3px solid var(--rule);
+    padding: 1em 1.2em;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.5;
+    text-align: left;
+    border-radius: 2px;
+  }
+  pre code { background: none; padding: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55em 0.8em;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    background: var(--code-bg);
+    font-variant: small-caps;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--ink);
+    font-size: 0.85em;
+  }
+  table.proscons td:first-child { width: 50%; padding-right: 1em; }
+  table.proscons .pro {
+    color: var(--pro);
+    font-weight: 600;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+  }
+  table.proscons .con {
+    color: var(--con);
+    font-weight: 600;
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+  }
+  .figure {
+    margin: 2.5em 0;
+    text-align: center;
+  }
+  .figure svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .figure .caption {
+    font-size: 0.86em;
+    font-style: italic;
+    color: var(--soft);
+    margin-top: 0.8em;
+    text-align: center;
+    padding: 0 2em;
+  }
+  .figure .caption strong { color: var(--ink); font-style: normal; }
+  cite {
+    color: var(--accent);
+    font-style: normal;
+    font-size: 0.88em;
+  }
+  cite::before { content: "["; }
+  cite::after { content: "]"; }
+  ul, ol { margin: 0.6em 0 0.6em 0; padding-left: 1.5em; }
+  li { margin: 0.25em 0; }
+  .references {
+    font-size: 0.85em;
+    line-height: 1.55;
+  }
+  .references ol { padding-left: 2em; }
+  .references li { margin: 0.5em 0; }
+  hr {
+    border: none;
+    border-top: 1px dashed var(--rule);
+    margin: 3em 0;
+  }
+  .toc {
+    background: var(--code-bg);
+    padding: 1.2em 1.5em;
+    border-left: 3px solid var(--gold);
+    margin: 2em 0 3em;
+    font-size: 0.92em;
+  }
+  .toc h4 { margin-top: 0; }
+  .toc ol { padding-left: 1.5em; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+  .keymsg {
+    background: linear-gradient(to right, var(--code-bg) 0%, transparent 100%);
+    border-left: 4px solid var(--accent);
+    padding: 0.9em 1.2em;
+    margin: 1.5em 0;
+    font-style: italic;
+  }
+  .keymsg strong { font-style: normal; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="titleblock">
+  <h1 class="papertitle">Tri-Memory Neuromodulation</h1>
+  <p class="subtitle">Unifying Symbolic Graph Retrieval, Test-Time Neural Memory, and Hebbian Skill Plasticity in a 700M Hybrid SSM via Affect-Gated Learning Rates</p>
+  <p class="authorline">
+    <strong>Vaisakh Constantine</strong> &nbsp;·&nbsp; NexAnalytica Research<br>
+    <span style="font-size:0.85em">Design Report · 2026-05-28</span>
+  </p>
+</header>
+
+<div class="abstract">
+  <h3>Abstract</h3>
+  <p>We present the design of a 700M-parameter small language model that integrates seven architectural advances developed independently across the 2024&ndash;2026 literature: (i) the subquadratic state-space layers of Mamba2 <cite>1</cite>; (ii) the noise-cancelling differential attention of the DIFF Transformer <cite>2</cite>; (iii) the Samba-style hybrid SSM&ndash;attention interleaving pattern <cite>3</cite>; (iv) the test-time-trained neural memory module of Titans in its Memory-as-Gating configuration <cite>4</cite>; (v) the Personalized-PageRank graph retrieval of HippoRAG <cite>5</cite>; (vi) Granite-style structured tool calling <cite>6</cite>; and (vii) a neuromodulatory affect signal &mdash; inspired by HormoneT5 <cite>7</cite> and reward-gated Hebbian plasticity <cite>8</cite> &mdash; that uniformly governs writes across three independent memory timescales. Our central thesis is not the introduction of any single architectural block, but rather the demonstration that <em>three independent memory systems operating at three distinct timescales</em> (symbolic graph, parametric neural, and Hebbian fast-weight) can be coherently unified by a single affect-driven scheduler. We argue this is the minimal architectural commitment needed to produce a small model that can learn during deployment without catastrophic collapse. This report functions as both a literature review of the constituent works and a complete design specification for the model.</p>
+</div>
+
+<div class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#intro">Introduction and Motivation</a></li>
+    <li><a href="#litreview">Literature Review of Constituent Architectures</a></li>
+    <li><a href="#design">Proposed Architecture: The Frankenstein</a></li>
+    <li><a href="#memory">The Tri-Memory Neuromodulation System</a></li>
+    <li><a href="#dataflow">Inference-Time Data Flow</a></li>
+    <li><a href="#training">Training Plan and Data Curriculum</a></li>
+    <li><a href="#eval">Evaluation Suite and Ablation Matrix</a></li>
+    <li><a href="#risks">Risks and Mitigations</a></li>
+    <li><a href="#discussion">Discussion and Publishability</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="intro">Introduction and Motivation</h2>
+
+<p>The past three years have produced a remarkable proliferation of architectural advances for language models, but these advances have largely been published in isolation. State-space models have reduced inference cost. Test-time-trained memory modules have offered a route to long-term recall without unbounded context. Knowledge-graph retrieval has improved multi-hop reasoning. Neuromodulatory inspired-by-biology controllers have appeared in early prototypes. Each of these strands matures in its own corner of the literature, evaluated against its own baselines, with little cross-pollination.</p>
+
+<p>This report proposes a deliberately maximalist synthesis. Rather than refining any single piece, we combine seven distinct advances into a single coherent architecture, with the explicit goal of producing a small model (700M parameters) that can <em>learn during use</em> &mdash; not merely retrieve from a static index, not merely cache recent context, but actually adapt its weights in response to interaction outcomes, while remaining stable enough to deploy as a personal agent.</p>
+
+<p>The motivating use case is what we call the <em>persistent analyst</em>: a small model deployed on local hardware that ingests a user's documents into a structured knowledge graph, exposes enterprise-grade tool calling for data manipulation, and adjusts its behavior over time to match the user's recurring task patterns. After observing that a particular analyst consistently asks for charts when running churn analyses, the model should learn this association rapidly and reversibly &mdash; without retraining, without external orchestration, and without forgetting the underlying competencies acquired during pretraining.</p>
+
+<div class="keymsg">
+  <strong>Central claim.</strong> Three memory systems at three timescales &mdash; (a) symbolic graph retrieval, (b) parametric test-time-trained neural memory, and (c) Hebbian fast weights bolted onto LoRA &mdash; are <em>complementary, not redundant</em>, and can be coherently scheduled by a single neuromodulatory affect signal. This unification, not any individual component, is the architectural contribution.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="litreview">Literature Review of Constituent Architectures</h2>
+
+<p>We survey each of the seven constituent strands, summarizing the canonical works, their core technical contribution, and their trade-offs when considered as candidates for inclusion in a unified small-model design.</p>
+
+<!-- ====== 2.1 Hybrid SSM-Attention ====== -->
+<h3 id="lit-hybrid">2.1 &nbsp;Hybrid State-Space &ndash; Attention Architectures</h3>
+
+<p>The lineage of subquadratic sequence models begins with the structured state-space models of S4 <cite>9</cite> and reaches its current canonical form in Mamba2 <cite>1</cite>, which reformulates the selective scan as a generalized matrix mixer admitting hardware-efficient parallel computation. Pure SSM stacks excel at long-context throughput but consistently underperform attention on tasks requiring precise associative recall &mdash; the MQAR benchmark of Arora et al. <cite>10</cite> made this gap quantitatively explicit. The natural resolution is hybridization: interleave SSM layers (for cheap context aggregation) with attention layers (for precision recall). Samba <cite>3</cite> demonstrated a 3:1 ratio of Mamba to sliding-window attention; Jamba <cite>11</cite> combined Mamba with full attention and MoE; Zamba2 <cite>12</cite> used a shared attention block; Hymba <cite>13</cite> went further and ran Mamba and attention <em>in parallel</em> within the same layer. Across all four, the empirical finding is consistent: hybrids strictly dominate either parent at small scales.</p>
+
+<div class="figure">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+  <!-- title -->
+  <text x="400" y="20" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 1. The lineage of hybrid SSM&ndash;attention architectures</text>
+  <!-- timeline axis -->
+  <line x1="50" y1="240" x2="750" y2="240" stroke="#1a1a1a" stroke-width="1.5"/>
+  <!-- year ticks -->
+  <g font-family="Georgia" font-size="10" fill="#5a5a5a" text-anchor="middle">
+    <line x1="100" y1="235" x2="100" y2="245" stroke="#5a5a5a"/><text x="100" y="260">2022</text>
+    <line x1="250" y1="235" x2="250" y2="245" stroke="#5a5a5a"/><text x="250" y="260">2023</text>
+    <line x1="400" y1="235" x2="400" y2="245" stroke="#5a5a5a"/><text x="400" y="260">2024</text>
+    <line x1="550" y1="235" x2="550" y2="245" stroke="#5a5a5a"/><text x="550" y="260">2025</text>
+    <line x1="700" y1="235" x2="700" y2="245" stroke="#5a5a5a"/><text x="700" y="260">2026</text>
+  </g>
+  <!-- nodes -->
+  <g font-family="Georgia" font-size="11" text-anchor="middle">
+    <circle cx="120" cy="180" r="22" fill="#3a6b8b" opacity="0.85"/>
+    <text x="120" y="183" fill="white" font-weight="bold">S4</text>
+    <circle cx="270" cy="160" r="22" fill="#3a6b8b" opacity="0.85"/>
+    <text x="270" y="163" fill="white" font-weight="bold">H3</text>
+    <circle cx="350" cy="120" r="26" fill="#3a6b8b"/>
+    <text x="350" y="123" fill="white" font-weight="bold">Mamba</text>
+    <circle cx="430" cy="100" r="26" fill="#3a6b8b"/>
+    <text x="430" y="103" fill="white" font-weight="bold">Mamba2</text>
+    <!-- hybrids -->
+    <circle cx="500" cy="170" r="26" fill="#8b1e1e"/>
+    <text x="500" y="173" fill="white" font-weight="bold">Jamba</text>
+    <circle cx="560" cy="130" r="26" fill="#8b1e1e"/>
+    <text x="560" y="133" fill="white" font-weight="bold">Samba</text>
+    <circle cx="610" cy="170" r="26" fill="#8b1e1e"/>
+    <text x="610" y="173" fill="white" font-weight="bold">Zamba2</text>
+    <circle cx="670" cy="120" r="26" fill="#8b1e1e"/>
+    <text x="670" y="123" fill="white" font-weight="bold">Hymba</text>
+    <!-- this work -->
+    <circle cx="730" cy="160" r="30" fill="#b8893a" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="730" y="158" fill="white" font-weight="bold" font-size="9">This</text>
+    <text x="730" y="170" fill="white" font-weight="bold" font-size="9">work</text>
+  </g>
+  <!-- edges -->
+  <g stroke="#5a5a5a" stroke-width="1" fill="none" opacity="0.5">
+    <line x1="142" y1="180" x2="248" y2="160"/>
+    <line x1="292" y1="160" x2="324" y2="120"/>
+    <line x1="376" y1="120" x2="404" y2="100"/>
+    <line x1="453" y1="100" x2="498" y2="170"/>
+    <line x1="453" y1="100" x2="558" y2="130"/>
+    <line x1="453" y1="100" x2="608" y2="170"/>
+    <line x1="453" y1="100" x2="668" y2="120"/>
+    <line x1="586" y1="130" x2="710" y2="160"/>
+    <line x1="696" y1="120" x2="720" y2="160"/>
+  </g>
+  <!-- legend -->
+  <g font-family="Georgia" font-size="10">
+    <circle cx="60" cy="60" r="6" fill="#3a6b8b"/><text x="72" y="64">Pure SSM</text>
+    <circle cx="160" cy="60" r="6" fill="#8b1e1e"/><text x="172" y="64">Hybrid SSM+Attn</text>
+    <circle cx="290" cy="60" r="6" fill="#b8893a"/><text x="302" y="64">Frankenstein (proposed)</text>
+  </g>
+</svg>
+<p class="caption"><strong>Figure 1.</strong> Lineage of state-space models and their hybridization with attention. The proposed work sits in the hybrid family but extends it with a memory hierarchy (Section 4) absent in all predecessors.</p>
+</div>
+
+<table class="proscons">
+  <tr><th>Hybrid SSM + Attention &mdash; trade-offs</th><th></th></tr>
+  <tr>
+    <td><span class="pro">Pros</span>
+      <ul>
+        <li>SSM layers scale linearly in sequence length; attention layers retain precise recall.</li>
+        <li>Empirically superior to either parent at the 100M&ndash;7B scale (Samba, Jamba, Hymba reports).</li>
+        <li>Inference latency at long context dominated by the cheaper SSM layers.</li>
+        <li>Training stable; well-precedented in published 1.5B&ndash;52B models.</li>
+      </ul>
+    </td>
+    <td><span class="con">Cons</span>
+      <ul>
+        <li>Adds two distinct kernel paths; engineering surface area larger than a pure transformer.</li>
+        <li>Optimal SSM:Attention ratio is task-dependent; usually rediscovered by ablation rather than principled choice.</li>
+        <li>External tooling (FlashAttention, etc.) targets pure attention &mdash; SSM kernels lag.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ====== 2.2 Differential Attention ====== -->
+<h3 id="lit-diff">2.2 &nbsp;Differential Attention</h3>
+
+<p>Ye et al. <cite>2</cite> observed that standard softmax attention distributes a non-trivial fraction of its mass onto irrelevant context tokens, manifesting as &ldquo;attention noise&rdquo; that limits precise retrieval, complicates structured output, and contributes to hallucination. Their <em>differential attention</em> mechanism computes two attention maps with separate query/key projections and subtracts one from the other, with a learnable scalar controlling the cancellation strength. The result is sharper attention concentrations on the genuinely relevant tokens. The mechanism is a drop-in replacement for multi-head attention with negligible parameter overhead. Reported gains on long-context retrieval, in-context learning order-robustness, and hallucination detection are substantial; the technique has been adopted by several open-weight models released in late 2025.</p>
+
+<table class="proscons">
+  <tr><th>Differential Attention &mdash; trade-offs</th><th></th></tr>
+  <tr>
+    <td><span class="pro">Pros</span>
+      <ul>
+        <li>Drop-in upgrade over MHA; ~80 lines of code.</li>
+        <li>Empirically better on retrieval-heavy and structured-output tasks &mdash; exactly our precision-critical jobs.</li>
+        <li>Improves quantization robustness via reduced activation outliers.</li>
+      </ul>
+    </td>
+    <td><span class="con">Cons</span>
+      <ul>
+        <li>Still O(n&sup2;); does not address long-context cost (we rely on Mamba2 for that).</li>
+        <li>Slightly higher per-layer FLOPs (two QK matmuls instead of one).</li>
+        <li>Younger literature than vanilla MHA; long-tail edge cases less explored.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ====== 2.3 Phi small-model philosophy ====== -->
+<h3 id="lit-phi">2.3 &nbsp;Phi-Style Small-Model Data Curation</h3>
+
+<p>The Phi series <cite>14</cite> demonstrated that a small model trained on aggressively curated, often synthetic, &ldquo;textbook-quality&rdquo; data can outperform much larger models trained on raw web text. The recipe inverts the prevailing Chinchilla-scaling logic: rather than scaling tokens with parameters, Phi held tokens roughly constant and dramatically raised per-token information density. We adopt this philosophy in our pretraining data mix (Section 6.2), tilting heavily toward FineWeb-Edu, Cosmopedia, OpenWebMath, and code corpora over raw CommonCrawl.</p>
+
+<!-- ====== 2.4 Granite tool calling ====== -->
+<h3 id="lit-granite">2.4 &nbsp;Enterprise Tool Calling: The Granite Lineage</h3>
+
+<p>IBM's Granite 3 series <cite>6</cite> produced one of the cleaner publicly documented tool-calling formats: a constrained JSON-schema block delimited by special tokens (<code>&lt;tool_call&gt;{...}&lt;/tool_call&gt;</code>) with explicit response framing (<code>&lt;tool_response&gt;...&lt;/tool_response&gt;</code>). The format trades expressivity for parseability and lends itself to formal grammar-constrained decoding. Combined with the Berkeley Function Calling Leaderboard <cite>15</cite> as a standardized eval, this region of the literature is now mature enough to be treated as a solved engineering problem &mdash; provided one has sufficient SFT data of comparable quality, which the Glaive and Hermes function-calling corpora supply under permissive licensing.</p>
+
+<!-- ====== 2.5 HippoRAG ====== -->
+<h3 id="lit-hipporag">2.5 &nbsp;HippoRAG: Graph-Based Retrieval with Cognitive Scaffolding</h3>
+
+<p>HippoRAG <cite>5</cite> draws an explicit analogy to the role of the hippocampus in human episodic memory: rather than retrieving by isolated dense similarity, it extracts a knowledge graph from a document corpus (via OpenIE), seeds the graph with query-relevant nodes, and uses Personalized PageRank to propagate relevance across multi-hop paths before retrieving the resulting chunks. The technique is purely retrieval-time &mdash; no model training is required &mdash; and yields strong improvements on multi-hop QA benchmarks (MuSiQue, 2WikiMultiHopQA, HotpotQA). The successor work, <em>From RAG to Memory</em> <cite>16</cite>, sharpens the graph-construction pipeline and adds an explicit memory-style update protocol.</p>
+
+<div class="figure">
+<svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+  <text x="360" y="18" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 2. HippoRAG: Personalized PageRank over an extracted knowledge graph</text>
+  <!-- nodes -->
+  <g font-family="Georgia" font-size="10" text-anchor="middle">
+    <circle cx="120" cy="80" r="18" fill="#8b8d3a" opacity="0.5"/>
+    <text x="120" y="84" fill="white">Doc&nbsp;A</text>
+    <circle cx="200" cy="120" r="18" fill="#8b8d3a"/>
+    <text x="200" y="124" fill="white">churn</text>
+    <circle cx="280" cy="80" r="18" fill="#8b8d3a" opacity="0.7"/>
+    <text x="280" y="84" fill="white">cohort</text>
+    <circle cx="350" cy="140" r="18" fill="#8b8d3a"/>
+    <text x="350" y="144" fill="white">SaaS</text>
+    <circle cx="280" cy="180" r="18" fill="#8b8d3a" opacity="0.7"/>
+    <text x="280" y="184" fill="white">NPS</text>
+    <circle cx="180" cy="200" r="18" fill="#8b8d3a" opacity="0.5"/>
+    <text x="180" y="204" fill="white">Doc&nbsp;B</text>
+    <circle cx="420" cy="80" r="18" fill="#8b8d3a" opacity="0.7"/>
+    <text x="420" y="84" fill="white">MRR</text>
+    <circle cx="430" cy="200" r="18" fill="#8b8d3a"/>
+    <text x="430" y="204" fill="white">retention</text>
+  </g>
+  <!-- edges -->
+  <g stroke="#5a5a5a" stroke-width="1" opacity="0.5">
+    <line x1="138" y1="80" x2="182" y2="120"/>
+    <line x1="200" y1="138" x2="280" y2="98"/>
+    <line x1="218" y1="120" x2="332" y2="140"/>
+    <line x1="200" y1="138" x2="280" y2="162"/>
+    <line x1="198" y1="200" x2="262" y2="180"/>
+    <line x1="298" y1="80" x2="402" y2="80"/>
+    <line x1="350" y1="158" x2="412" y2="200"/>
+    <line x1="280" y1="180" x2="412" y2="200"/>
+  </g>
+  <!-- ppr seed -->
+  <circle cx="200" cy="120" r="25" fill="none" stroke="#8b1e1e" stroke-width="2" stroke-dasharray="3 3"/>
+  <text x="200" y="155" text-anchor="middle" font-family="Georgia" font-size="9" fill="#8b1e1e">seed (query entity)</text>
+  <!-- propagation arrow -->
+  <text x="350" y="248" text-anchor="middle" font-family="Georgia" font-size="10" fill="#5a5a5a" font-style="italic">PPR propagates relevance from seed to multi-hop neighbors</text>
+  <!-- right side: result -->
+  <g font-family="Georgia" font-size="10">
+    <rect x="540" y="60" width="160" height="160" fill="none" stroke="#5a5a5a"/>
+    <text x="620" y="80" text-anchor="middle" font-style="italic">retrieved chunks</text>
+    <text x="550" y="105">1. Doc A: churn def&hellip;</text>
+    <text x="550" y="125">2. Doc A: cohort split</text>
+    <text x="550" y="145">3. Doc B: retention</text>
+    <text x="550" y="165">4. Doc A: SaaS metrics</text>
+    <text x="550" y="185">&nbsp;</text>
+    <text x="550" y="205" fill="#5a5a5a">ranked by PPR score</text>
+  </g>
+  <path d="M 460 130 Q 500 130 535 130" stroke="#5a5a5a" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#5a5a5a"/>
+    </marker>
+  </defs>
+</svg>
+<p class="caption"><strong>Figure 2.</strong> The HippoRAG retrieval pattern. A user query identifies seed entities in the extracted knowledge graph; Personalized PageRank propagates relevance scores across multi-hop neighbors; chunks attached to high-scoring nodes are returned. Multi-hop questions that defeat naive dense retrieval (where no single chunk answers the query) succeed because the graph structure makes the inferential bridge explicit.</p>
+</div>
+
+<table class="proscons">
+  <tr><th>HippoRAG &mdash; trade-offs</th><th></th></tr>
+  <tr>
+    <td><span class="pro">Pros</span>
+      <ul>
+        <li>Strong on multi-hop questions where naive dense RAG fails.</li>
+        <li>Graph is human-inspectable; failures are debuggable.</li>
+        <li>No model training required; pure retrieval-time mechanism.</li>
+        <li>Citations are first-class: every fact traces to a document chunk.</li>
+      </ul>
+    </td>
+    <td><span class="con">Cons</span>
+      <ul>
+        <li>Graph extraction quality is upstream-bottlenecked by the OpenIE model.</li>
+        <li>PPR computation latency scales with graph size; needs caching at deploy.</li>
+        <li>Cannot &ldquo;feel&rdquo; relevance the way a learned dense retriever can &mdash; misses purely semantic matches.</li>
+        <li>Knowledge updates require re-extraction of triples, not just re-embedding.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ====== 2.6 Titans ====== -->
+<h3 id="lit-titans">2.6 &nbsp;Titans: Test-Time-Trained Neural Memory</h3>
+
+<p>Behrouz et al.&apos;s <em>Titans</em> <cite>4</cite> took the heretical step of allowing a small module's weights to update <em>at inference time</em>. The mechanism is structurally simple: a two-layer MLP is queried with each token's key vector, and the squared reconstruction error against the observed value vector defines a <em>surprise signal</em>. When surprise exceeds a threshold, a single SGD-style step updates the MLP's weights. Over a sequence, the MLP becomes a compressed associative memory of patterns the model has found surprising. Titans was introduced with three architectural variants &mdash; Memory-as-Context (MAC), Memory-as-Gating (MAG), and Memory-as-Layer (MAL) &mdash; differing in how the memory's output is combined with the backbone. MAG, in which memory and attention run in parallel and their outputs are combined via a learned sigmoid gate, is the most amenable to hybrid backbones because it integrates at every layer without extending the context length. Subsequent work <cite>17</cite> has reproduced and extended these findings.</p>
+
+<div class="figure">
+<svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg">
+  <text x="360" y="18" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 3. The three Titans configurations and our choice (MAG)</text>
+  <g font-family="Georgia" font-size="11">
+    <!-- MAC -->
+    <text x="120" y="50" text-anchor="middle" font-weight="bold">MAC</text>
+    <text x="120" y="65" text-anchor="middle" font-size="9" fill="#5a5a5a">Memory as Context</text>
+    <rect x="50" y="80" width="140" height="40" fill="#f4f1ea" stroke="#5a5a5a"/>
+    <text x="120" y="105" text-anchor="middle" font-size="10">[mem tokens][input]</text>
+    <rect x="50" y="130" width="140" height="40" fill="#3a6b8b" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="120" y="155" text-anchor="middle" font-size="10">Attention</text>
+    <line x1="120" y1="120" x2="120" y2="130" stroke="#5a5a5a" marker-end="url(#a2)"/>
+    <text x="120" y="200" text-anchor="middle" font-size="9" fill="#8b3a1e">extends context</text>
+
+    <!-- MAG -->
+    <text x="360" y="50" text-anchor="middle" font-weight="bold" fill="#b8893a">MAG (chosen)</text>
+    <text x="360" y="65" text-anchor="middle" font-size="9" fill="#5a5a5a">Memory as Gating</text>
+    <rect x="280" y="80" width="60" height="40" fill="#3a6b8b" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="310" y="105" text-anchor="middle" font-size="9">Backbone</text>
+    <rect x="370" y="80" width="60" height="40" fill="#8b1e1e" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="400" y="100" text-anchor="middle" font-size="9">Titans</text>
+    <text x="400" y="113" text-anchor="middle" font-size="9">MLP</text>
+    <circle cx="360" cy="155" r="14" fill="#b8893a" opacity="0.6" stroke="#5a5a5a"/>
+    <text x="360" y="159" text-anchor="middle" font-size="11">&sigma;</text>
+    <line x1="310" y1="120" x2="350" y2="145" stroke="#5a5a5a"/>
+    <line x1="400" y1="120" x2="370" y2="145" stroke="#5a5a5a"/>
+    <line x1="360" y1="169" x2="360" y2="185" stroke="#5a5a5a" marker-end="url(#a2)"/>
+    <text x="360" y="205" text-anchor="middle" font-size="9" fill="#2d5a3d">no ctx extension, every layer</text>
+
+    <!-- MAL -->
+    <text x="600" y="50" text-anchor="middle" font-weight="bold">MAL</text>
+    <text x="600" y="65" text-anchor="middle" font-size="9" fill="#5a5a5a">Memory as Layer</text>
+    <rect x="540" y="80" width="120" height="22" fill="#3a6b8b" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="600" y="96" text-anchor="middle" font-size="9">Backbone block</text>
+    <rect x="540" y="105" width="120" height="22" fill="#8b1e1e" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="600" y="121" text-anchor="middle" font-size="9">Titans memory</text>
+    <rect x="540" y="130" width="120" height="22" fill="#3a6b8b" opacity="0.3" stroke="#5a5a5a"/>
+    <text x="600" y="146" text-anchor="middle" font-size="9">Backbone block</text>
+    <text x="600" y="200" text-anchor="middle" font-size="9" fill="#8b3a1e">serial bottleneck</text>
+  </g>
+  <defs>
+    <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#5a5a5a"/>
+    </marker>
+  </defs>
+</svg>
+<p class="caption"><strong>Figure 3.</strong> The three Titans memory configurations. We adopt MAG because in a hybrid backbone where 75% of layers are Mamba2 (with no native query mechanism), parallel placement provides memory access at every layer without extending sequence length or serializing the stack.</p>
+</div>
+
+<table class="proscons">
+  <tr><th>Titans (MAG) &mdash; trade-offs</th><th></th></tr>
+  <tr>
+    <td><span class="pro">Pros</span>
+      <ul>
+        <li>Memory genuinely &ldquo;learns&rdquo; during inference; not just a cache.</li>
+        <li>Fixed memory footprint (the MLP) regardless of how much data flows through.</li>
+        <li>Surprise-gated updates are biologically plausible and computationally cheap.</li>
+        <li>MAG variant requires no context extension &mdash; preserves Mamba2&apos;s long-context advantage.</li>
+      </ul>
+    </td>
+    <td><span class="con">Cons</span>
+      <ul>
+        <li>The youngest of our constituent ideas; long-term stability under heavy use unestablished.</li>
+        <li>Recall is lossy and uninterpretable (a 2-layer MLP is a black box).</li>
+        <li>Test-time gradient updates complicate deployment (autograd at inference, weight versioning).</li>
+        <li>Risk of memory poisoning by adversarial inputs unless surprise threshold is well-tuned.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ====== 2.7 Neuromodulation & Hebbian ====== -->
+<h3 id="lit-neuromod">2.7 &nbsp;Neuromodulation and Hebbian Plasticity</h3>
+
+<p>Biological brains do not learn with a single uniform signal; they modulate plasticity via neurochemicals (dopamine, serotonin, noradrenaline, cortisol) that gate when, where, and how strongly synapses change. HormoneT5 <cite>7</cite> implemented an explicit hormone analogue in a T5 backbone, computing six scalar &ldquo;hormone&rdquo; values that modulate FFN gating. The Neuromodulation Gated Transformer <cite>18</cite> extended this with affect-gated layer outputs. Neither, however, applied the neuromodulatory signal to <em>learning</em> &mdash; both used it only for inference-time gating of activations.</p>
+
+<p>Hebbian fast weights have a parallel lineage. Munkhdalai et al. <cite>19</cite> introduced fast-weight transformers; recent work on neuromodulated Hebbian plasticity in transformers <cite>8</cite> combined gradient-based meta-learning with Hebbian inner updates. AutoTool <cite>20</cite> built tool-transition graphs from trajectories, structurally similar to a co-firing matrix but populated by trajectory statistics rather than three-factor Hebbian rules.</p>
+
+<p>We propose to merge these strands. A scalar affect signal (joy, frustration, confidence, fatigue, boredom) modulates not activations but <em>learning rates</em> across all writable memory tiers. A Hebbian co-firing matrix, populated by reward-gated three-factor rules, biases tool-selection at inference. The unification &mdash; a single neuromodulatory state governing parametric weights (Titans), explicit fast weights (Hebbian H), and low-rank deltas (LoRA) simultaneously &mdash; appears to be original.</p>
+
+<table class="proscons">
+  <tr><th>Hormone + Hebbian neuromodulation &mdash; trade-offs</th><th></th></tr>
+  <tr>
+    <td><span class="pro">Pros</span>
+      <ul>
+        <li>Provides a principled scheduler for <em>when</em> to update each memory tier.</li>
+        <li>Inspectable: the Hebbian H matrix can literally be printed and read.</li>
+        <li>The &ldquo;step back&rdquo; behavior (frustration &rArr; rollback + exploration) emerges naturally.</li>
+        <li>Aligns with three-factor learning rules well-established in computational neuroscience.</li>
+      </ul>
+    </td>
+    <td><span class="con">Cons</span>
+      <ul>
+        <li>Reward signal design is brittle; spurious joy can reinforce wrong behaviors.</li>
+        <li>No public dataset has paired correction&middot;retry&middot;satisfaction signals &mdash; cold-start problem.</li>
+        <li>The Hebbian H biases tool-selection &mdash; could produce overconfident, &ldquo;rut&rdquo; behavior if decay is too slow.</li>
+        <li>Adds five new hyperparameters per memory tier; ablation surface is large.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<!-- ====== 2.8 Online LoRA ====== -->
+<h3 id="lit-online">2.8 &nbsp;Online LoRA and Continual Learning</h3>
+
+<p>The body of work on continual learning in language models <cite>21</cite> has converged on a small number of stable techniques: low-rank adapters (LoRA) <cite>22</cite> isolate update capacity from the frozen base; experience replay buffers preserve representative samples of past distributions; snapshot/rollback mechanisms allow recovery from degradation. Online-LoRA <cite>23</cite> demonstrated that adapter updates can occur during deployment, provided the adapter rank is small and the base remains frozen. The TRACE benchmark <cite>24</cite> provides a standard evaluation harness for measuring backward transfer (forgetting) and forward transfer (positive interference) across sequential tasks.</p>
+
+<p>The unsolved residual challenges &mdash; reward hacking, distribution drift, catastrophic forgetting under uncontrolled signals &mdash; are precisely what the neuromodulatory scheduler is intended to address. The hormones gate <em>when</em> the LoRA updates and the snapshot ring permits recovery <em>after</em> degradation.</p>
+
+<!-- ============================================================ -->
+<h2 id="design">Proposed Architecture: The Frankenstein</h2>
+
+<h3 id="design-shape">3.1 &nbsp;Overall shape and parameter budget</h3>
+
+<p>The backbone is a 24-layer hybrid stack with a 3:1 ratio of Mamba2 to differential-attention blocks, following the Samba pattern with differential attention substituted for vanilla MHA. Attention layers are placed at positions 4, 8, 12, 16, 20, and 24 &mdash; serving as <em>precision checkpoints</em> distributed evenly through the stack and at the output. Table 1 summarizes hyperparameters.</p>
+
+<table>
+  <tr><th>Component</th><th>Value</th><th>Justification</th></tr>
+  <tr><td><code>d_model</code></td><td>1536</td><td>Hits ~700M total params at 24 layers; standard SLM width.</td></tr>
+  <tr><td>Layers</td><td>24 (18 Mamba2 + 6 DiffAttn)</td><td>Samba 3:1 ratio empirically optimal at this scale.</td></tr>
+  <tr><td>Attention heads</td><td>12, head_dim 128</td><td>GQA with 4 KV heads to reduce KV-cache memory.</td></tr>
+  <tr><td>Mamba2 state dim</td><td>128</td><td>Default from Mamba2 paper; balances recall and cost.</td></tr>
+  <tr><td>Mamba2 expansion</td><td>2&times; (d_inner 3072)</td><td>Standard.</td></tr>
+  <tr><td>FFN</td><td>SwiGLU, expansion 2.67&times;</td><td>Smaller than Llama&apos;s 3.5&times;; matches hybrid budgets.</td></tr>
+  <tr><td>Normalization</td><td>RMSNorm, pre-norm</td><td>Stable across both block types.</td></tr>
+  <tr><td>Positional</td><td>RoPE on attention; SSM inherent</td><td>Mamba2 carries position natively.</td></tr>
+  <tr><td>Vocabulary</td><td>32k (Phi-3 tokenizer + 16 specials)</td><td>Skip training a new tokenizer; gain tool/memory tokens.</td></tr>
+  <tr><td>Training context</td><td>4k (pretrain) &rarr; 32k (extension)</td><td>Mamba2 extension is cheap; defer until pretrain settles.</td></tr>
+  <tr><td>Total parameters</td><td>~700M (&plusmn;50M)</td><td>Trains on a single A100 in ~3&ndash;4 weeks.</td></tr>
+</table>
+
+<div class="figure">
+<svg viewBox="0 0 760 540" xmlns="http://www.w3.org/2000/svg">
+  <text x="380" y="20" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 4. Frankenstein architecture overview &mdash; backbone stack and memory tiers</text>
+  <!-- left: layer stack -->
+  <g font-family="Georgia" font-size="9">
+    <text x="120" y="50" text-anchor="middle" font-weight="bold" font-size="11">24-layer hybrid backbone</text>
+    <!-- 24 layers, Mamba2 mostly, diff-attn at 4,8,12,16,20,24 -->
+    <!-- generate rows -->
+    <g>
+      <!-- L1 mamba -->
+      <rect x="40" y="70" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="80" text-anchor="middle" fill="white">L1 &middot; Mamba2</text>
+      <rect x="40" y="86" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="96" text-anchor="middle" fill="white">L2 &middot; Mamba2</text>
+      <rect x="40" y="102" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="112" text-anchor="middle" fill="white">L3 &middot; Mamba2</text>
+      <rect x="40" y="118" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="128" text-anchor="middle" fill="white" font-weight="bold">L4 &middot; DiffAttn ★</text>
+      <rect x="40" y="134" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="144" text-anchor="middle" fill="white">L5 &middot; Mamba2</text>
+      <rect x="40" y="150" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="160" text-anchor="middle" fill="white">L6 &middot; Mamba2</text>
+      <rect x="40" y="166" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="176" text-anchor="middle" fill="white">L7 &middot; Mamba2</text>
+      <rect x="40" y="182" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="192" text-anchor="middle" fill="white" font-weight="bold">L8 &middot; DiffAttn ★</text>
+      <rect x="40" y="198" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="208" text-anchor="middle" fill="white">L9 &middot; Mamba2</text>
+      <rect x="40" y="214" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="224" text-anchor="middle" fill="white">L10 &middot; Mamba2</text>
+      <rect x="40" y="230" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="240" text-anchor="middle" fill="white">L11 &middot; Mamba2</text>
+      <rect x="40" y="246" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="256" text-anchor="middle" fill="white" font-weight="bold">L12 &middot; DiffAttn ★</text>
+      <rect x="40" y="262" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="272" text-anchor="middle" fill="white">L13 &middot; Mamba2</text>
+      <rect x="40" y="278" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="288" text-anchor="middle" fill="white">L14 &middot; Mamba2</text>
+      <rect x="40" y="294" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="304" text-anchor="middle" fill="white">L15 &middot; Mamba2</text>
+      <rect x="40" y="310" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="320" text-anchor="middle" fill="white" font-weight="bold">L16 &middot; DiffAttn ★</text>
+      <rect x="40" y="326" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="336" text-anchor="middle" fill="white">L17 &middot; Mamba2</text>
+      <rect x="40" y="342" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="352" text-anchor="middle" fill="white">L18 &middot; Mamba2</text>
+      <rect x="40" y="358" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="368" text-anchor="middle" fill="white">L19 &middot; Mamba2</text>
+      <rect x="40" y="374" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="384" text-anchor="middle" fill="white" font-weight="bold">L20 &middot; DiffAttn ★</text>
+      <rect x="40" y="390" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="400" text-anchor="middle" fill="white">L21 &middot; Mamba2</text>
+      <rect x="40" y="406" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="416" text-anchor="middle" fill="white">L22 &middot; Mamba2</text>
+      <rect x="40" y="422" width="160" height="14" fill="#3a6b8b" opacity="0.7"/>
+      <text x="120" y="432" text-anchor="middle" fill="white">L23 &middot; Mamba2</text>
+      <rect x="40" y="438" width="160" height="14" fill="#8b1e1e"/>
+      <text x="120" y="448" text-anchor="middle" fill="white" font-weight="bold">L24 &middot; DiffAttn ★</text>
+    </g>
+    <text x="120" y="475" text-anchor="middle" font-size="9" fill="#5a5a5a">★ = precision checkpoint; HippoRAG injects here</text>
+  </g>
+
+  <!-- right: memory hierarchy -->
+  <g font-family="Georgia" font-size="10">
+    <text x="510" y="50" text-anchor="middle" font-weight="bold" font-size="11">Memory hierarchy</text>
+    <rect x="280" y="70" width="460" height="50" fill="#c97a7a" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="510" y="88" text-anchor="middle" font-weight="bold">TIER 0a &mdash; Hormone scalars</text>
+    <text x="510" y="105" text-anchor="middle" font-size="9">joy &middot; frustration &middot; confidence &middot; fatigue &middot; boredom</text>
+    <text x="510" y="118" text-anchor="middle" font-size="9" fill="#5a5a5a">EMA, updates per turn, modulates everything below</text>
+
+    <rect x="280" y="130" width="460" height="50" fill="#c97a7a" opacity="0.2" stroke="#1a1a1a"/>
+    <text x="510" y="148" text-anchor="middle" font-weight="bold">TIER 0b &mdash; Hebbian co-firing matrix H</text>
+    <text x="510" y="165" text-anchor="middle" font-size="9">sparse |F|&times;|F| matrix; reward-gated three-factor rule</text>
+    <text x="510" y="178" text-anchor="middle" font-size="9" fill="#5a5a5a">biases tool-selection logits at inference</text>
+
+    <rect x="280" y="190" width="460" height="50" fill="#8b8d3a" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="510" y="208" text-anchor="middle" font-weight="bold">TIER 1 &mdash; HippoRAG knowledge graph</text>
+    <text x="510" y="225" text-anchor="middle" font-size="9">external, symbolic, citable; PPR retrieval over OpenIE triples</text>
+    <text x="510" y="238" text-anchor="middle" font-size="9" fill="#5a5a5a">updates: per-doc ingest (minutes)</text>
+
+    <rect x="280" y="250" width="460" height="50" fill="#3a6b8b" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="510" y="268" text-anchor="middle" font-weight="bold">TIER 2 &mdash; Titans MAG memory MLP</text>
+    <text x="510" y="285" text-anchor="middle" font-size="9">internal, parametric, compressed; surprise-gated test-time updates</text>
+    <text x="510" y="298" text-anchor="middle" font-size="9" fill="#5a5a5a">updates: per-token (microseconds)</text>
+
+    <rect x="280" y="310" width="460" height="50" fill="#6b4a8b" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="510" y="328" text-anchor="middle" font-weight="bold">TIER 3 &mdash; Runtime LoRA &Delta;-weights</text>
+    <text x="510" y="345" text-anchor="middle" font-size="9">rank-16 adapters; online + nightly sleep training; snapshot ring</text>
+    <text x="510" y="358" text-anchor="middle" font-size="9" fill="#5a5a5a">updates: per-N-turns (online) + per-night (sleep)</text>
+
+    <!-- arrows from hormones down -->
+    <g stroke="#c97a7a" stroke-width="1.5" fill="none" opacity="0.7">
+      <line x1="290" y1="120" x2="290" y2="190" marker-end="url(#a3)"/>
+      <line x1="290" y1="250" x2="290" y2="310" marker-end="url(#a3)"/>
+      <line x1="290" y1="180" x2="290" y2="195" marker-end="url(#a3)"/>
+    </g>
+    <text x="265" y="270" text-anchor="middle" font-size="9" fill="#c97a7a" transform="rotate(-90 265 270)">modulates</text>
+
+    <!-- arrows from layer stack to memory tiers -->
+    <g stroke="#5a5a5a" stroke-width="1" fill="none" opacity="0.4" stroke-dasharray="2 2">
+      <line x1="200" y1="128" x2="280" y2="200"/>
+      <line x1="200" y1="256" x2="280" y2="275"/>
+      <line x1="200" y1="384" x2="280" y2="335"/>
+    </g>
+    <text x="240" y="430" text-anchor="middle" font-size="9" fill="#5a5a5a" font-style="italic">precision checkpoints read/write</text>
+    <text x="240" y="445" text-anchor="middle" font-size="9" fill="#5a5a5a" font-style="italic">from all memory tiers</text>
+  </g>
+  <defs>
+    <marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#c97a7a"/>
+    </marker>
+  </defs>
+</svg>
+<p class="caption"><strong>Figure 4.</strong> Frankenstein architecture overview. The 24-layer hybrid backbone (left) interleaves 18 Mamba2 blocks with 6 differential-attention &ldquo;precision checkpoints.&rdquo; The memory hierarchy (right) consists of five tiers spanning four orders of magnitude in update latency. The hormone scalars at Tier 0a modulate update behavior across all writable tiers (red arrows). Precision checkpoints serve as the integration points between the backbone and the slower memory systems.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="memory">The Tri-Memory Neuromodulation System</h2>
+
+<p>This section details the mechanism that constitutes the paper&apos;s central contribution.</p>
+
+<h3 id="mem-tier1">4.1 &nbsp;Tier 1: HippoRAG external graph memory</h3>
+
+<p>Documents are ingested through a Phi-3-mini-based OpenIE pipeline that extracts (subject, predicate, object) triples. Triples are aggregated into a NetworkX graph, with document-chunk pointers attached to nodes for citation. At query time, embeddings of named entities in the query seed Personalized PageRank; chunks attached to high-scoring nodes are retrieved. Retrieved chunks are injected at the 6 differential-attention layers (and only those) via a cross-attention adapter whose Q comes from the layer&apos;s hidden state and whose K/V come from chunk embeddings. The Mamba2 layers see only the original token stream.</p>
+
+<h3 id="mem-tier2">4.2 &nbsp;Tier 2: Titans MAG neural memory</h3>
+
+<p>A single 2-layer MLP (d_in=1536, d_hidden=2048, d_out=1536, ~15M parameters) is shared across all 24 backbone layers, with the layer index added to the key as a small positional bias. At every layer, the backbone&apos;s block output (whether Mamba2 or DiffAttn) and the MLP&apos;s output are combined via a learned sigmoid gate. The MLP&apos;s weights update at test time: when surprise (the squared reconstruction error against the observed value) exceeds a threshold &tau;<sub>surprise</sub>, a single Adam step is taken with learning rate &eta;<sub>titans</sub>. Critically, both &tau;<sub>surprise</sub> and &eta;<sub>titans</sub> are <em>modulated by the hormone scalars</em> (Section 4.5).</p>
+
+<h3 id="mem-tier3">4.3 &nbsp;Tier 3: Runtime LoRA with snapshot ring</h3>
+
+<p>Rank-16 LoRA adapters are attached to the Q/K/V/O projections of every differential-attention layer and to the input/output projections of every Mamba2 block, totaling ~30M trainable parameters. The base model is frozen. Two distinct update channels exist:</p>
+
+<ul>
+  <li><strong>Online updates</strong> occur during deployment, triggered by surprise and gated by hormone signals (only when joy is high, frustration low, and the interaction was user-confirmed). Single-step Adam with hormone-modulated LR.</li>
+  <li><strong>Sleep training</strong> occurs nightly (or when fatigue exceeds a threshold), running a full epoch over the day&apos;s buffered interactions with a standard cosine schedule, followed by a snapshot.</li>
+</ul>
+
+<p>A ring buffer holds the last 8 LoRA snapshots. Every 100 online updates, a canary eval (100 frozen prompts covering tool-call format, RAG faithfulness, and reasoning) runs; any metric drop &gt;5% triggers automatic rollback to the most recent snapshot with acceptable metrics.</p>
+
+<h3 id="mem-tier0b">4.4 &nbsp;Tier 0b: Hebbian co-firing matrix H</h3>
+
+<p>This is the fast pre-LoRA learning short-circuit. We track features that co-fire in positively-reinforced interactions:</p>
+
+<pre>Features tracked per turn (sparse indicators):
+  - task_intent  (k-means cluster id over query embedding, k=512)
+  - tools_used   (~64 distinct tool types)
+  - retrieval_sources (k=256 HippoRAG community ids)
+  - response_shape (table / chart / prose / code, ~16 ids)
+
+H is a sparse |F|&times;|F| matrix with |F| &asymp; 850.
+
+Three-factor Hebbian update (eligibility &times; reward &times; modulator):
+  if joy_t &gt; &tau;_joy:
+    for each active pair (i,j) in turn t:
+        H[i,j] += &eta;_H &middot; joy_t &middot; co_act(i,j)
+  if frustration_t &gt; &tau;_frust:
+        H[i,j] *= (1 &minus; decay &middot; frustration_t)
+
+At inference, H biases tool-selection logits:
+  logits_tool  +=  &lambda; &middot; H[task_intent_id, :] @ tool_embeddings</pre>
+
+<p>The matrix is small (&lt;100 MB), interpretable (one can <code>print(H[churn_intent])</code> and read which tools and response shapes the system associates with churn analysis), and instantly reversible (zeroing an entry undoes a learned association). After a few user-confirmed &ldquo;churn analysis &rarr; chart&rdquo; interactions, <code>H[churn_id, make_chart_id]</code> rises; the fifth churn query receives a tool-selection bias toward <code>make_chart</code> <em>before</em> any LoRA delta has propagated through the slower Tier 3 channel.</p>
+
+<h3 id="mem-tier0a">4.5 &nbsp;Tier 0a: Hormone scalars and unified modulation</h3>
+
+<p>Five EMA-tracked scalars define the model&apos;s affective state at any moment:</p>
+
+<table>
+  <tr><th>Scalar</th><th>Raised by</th><th>Effect when high</th></tr>
+  <tr><td><code>joy</code></td><td>User-accepted outputs, successful tool calls, low retry rate</td><td>Raise LoRA LR on recent traces; reinforce co-firing in H</td></tr>
+  <tr><td><code>frustration</code></td><td>User corrections, tool failures, repeated bad outputs</td><td>Cut LoRA LR; raise sampling temperature; consult HippoRAG more eagerly; if &gt; &tau;<sub>panic</sub>, rollback last snapshot</td></tr>
+  <tr><td><code>confidence</code></td><td>Low prediction entropy combined with good outcomes</td><td>Skip retrieval to reduce latency; lower sampling temperature</td></tr>
+  <tr><td><code>fatigue</code></td><td>Time since last snapshot; number of online updates accumulated</td><td>Force snapshot; schedule sleep-training run</td></tr>
+  <tr><td><code>boredom</code></td><td>Sustained low variance in Titans surprise signal</td><td>Lower &tau;<sub>surprise</sub> so Titans updates more eagerly</td></tr>
+</table>
+
+<div class="figure">
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+  <text x="360" y="20" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 5. The neuromodulatory feedback loop &mdash; one inference turn</text>
+  <g font-family="Georgia" font-size="10">
+    <!-- query in -->
+    <rect x="20" y="60" width="100" height="40" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="70" y="78" text-anchor="middle" font-weight="bold">User query</text>
+    <text x="70" y="92" text-anchor="middle" font-size="9">+ context</text>
+
+    <!-- backbone -->
+    <rect x="160" y="60" width="120" height="40" fill="#3a6b8b" opacity="0.4" stroke="#1a1a1a"/>
+    <text x="220" y="78" text-anchor="middle" font-weight="bold">Hybrid backbone</text>
+    <text x="220" y="92" text-anchor="middle" font-size="9">24-layer SSM+DiffAttn</text>
+
+    <!-- response -->
+    <rect x="320" y="60" width="100" height="40" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="370" y="78" text-anchor="middle" font-weight="bold">Response</text>
+    <text x="370" y="92" text-anchor="middle" font-size="9">+ tool calls</text>
+
+    <!-- user reaction -->
+    <rect x="460" y="60" width="100" height="40" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="510" y="78" text-anchor="middle" font-weight="bold">User reaction</text>
+    <text x="510" y="92" text-anchor="middle" font-size="9">accept / correct</text>
+
+    <!-- reward extractor -->
+    <rect x="600" y="60" width="100" height="40" fill="#b8893a" opacity="0.5" stroke="#1a1a1a"/>
+    <text x="650" y="78" text-anchor="middle" font-weight="bold">Reward signal</text>
+    <text x="650" y="92" text-anchor="middle" font-size="9">joy / frustration</text>
+
+    <!-- arrows top row -->
+    <g stroke="#1a1a1a" stroke-width="1" fill="none">
+      <line x1="120" y1="80" x2="158" y2="80" marker-end="url(#a4)"/>
+      <line x1="280" y1="80" x2="318" y2="80" marker-end="url(#a4)"/>
+      <line x1="420" y1="80" x2="458" y2="80" marker-end="url(#a4)"/>
+      <line x1="560" y1="80" x2="598" y2="80" marker-end="url(#a4)"/>
+    </g>
+
+    <!-- hormones box -->
+    <rect x="280" y="150" width="280" height="50" fill="#c97a7a" opacity="0.4" stroke="#1a1a1a"/>
+    <text x="420" y="170" text-anchor="middle" font-weight="bold">Hormone state (EMA)</text>
+    <text x="420" y="185" text-anchor="middle" font-size="9">joy &middot; frustration &middot; confidence &middot; fatigue &middot; boredom</text>
+
+    <!-- reward to hormones -->
+    <line x1="650" y1="100" x2="500" y2="150" stroke="#1a1a1a" stroke-width="1" marker-end="url(#a4)" fill="none"/>
+
+    <!-- memory tiers below -->
+    <rect x="40" y="240" width="140" height="50" fill="#8b8d3a" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="110" y="258" text-anchor="middle" font-weight="bold">Tier 1: HippoRAG</text>
+    <text x="110" y="273" text-anchor="middle" font-size="9">re-rank on frustration</text>
+
+    <rect x="200" y="240" width="140" height="50" fill="#3a6b8b" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="270" y="258" text-anchor="middle" font-weight="bold">Tier 2: Titans MLP</text>
+    <text x="270" y="273" text-anchor="middle" font-size="9">surprise &times; boredom = LR</text>
+
+    <rect x="360" y="240" width="140" height="50" fill="#6b4a8b" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="430" y="258" text-anchor="middle" font-weight="bold">Tier 3: Runtime LoRA</text>
+    <text x="430" y="273" text-anchor="middle" font-size="9">joy &uarr; &Rarr; LR &uarr;</text>
+
+    <rect x="520" y="240" width="140" height="50" fill="#c97a7a" opacity="0.3" stroke="#1a1a1a"/>
+    <text x="590" y="258" text-anchor="middle" font-weight="bold">Tier 0b: Hebbian H</text>
+    <text x="590" y="273" text-anchor="middle" font-size="9">co-fire &times; joy &Rarr; H&uarr;</text>
+
+    <!-- hormones to tiers -->
+    <g stroke="#c97a7a" stroke-width="1.5" fill="none" opacity="0.8">
+      <line x1="320" y1="200" x2="120" y2="240" marker-end="url(#a5)"/>
+      <line x1="380" y1="200" x2="270" y2="240" marker-end="url(#a5)"/>
+      <line x1="460" y1="200" x2="430" y2="240" marker-end="url(#a5)"/>
+      <line x1="520" y1="200" x2="590" y2="240" marker-end="url(#a5)"/>
+    </g>
+    <text x="420" y="220" text-anchor="middle" font-size="9" fill="#c97a7a" font-style="italic">modulates learning rates &amp; thresholds across all tiers</text>
+
+    <!-- tiers feed back into backbone -->
+    <g stroke="#5a5a5a" stroke-width="1" fill="none" stroke-dasharray="3 3">
+      <line x1="110" y1="240" x2="200" y2="100"/>
+      <line x1="270" y1="240" x2="220" y2="100"/>
+      <line x1="430" y1="240" x2="240" y2="100"/>
+      <line x1="590" y1="240" x2="260" y2="100"/>
+    </g>
+    <text x="420" y="320" text-anchor="middle" font-size="9" fill="#5a5a5a" font-style="italic">next turn: backbone reads from all memory tiers (dashed lines)</text>
+  </g>
+  <defs>
+    <marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#1a1a1a"/>
+    </marker>
+    <marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 z" fill="#c97a7a"/>
+    </marker>
+  </defs>
+</svg>
+<p class="caption"><strong>Figure 5.</strong> The neuromodulatory feedback loop. Each turn produces a reward signal (joy/frustration) extracted from user reaction. The hormone EMA state updates accordingly. On the next turn, hormones modulate the learning rates and update thresholds of all writable memory tiers, producing a closed loop in which the model&apos;s mood literally controls its own plasticity.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="dataflow">Inference-Time Data Flow</h2>
+
+<p>One complete inference turn, end to end:</p>
+
+<pre>1.  User query arrives
+2.  Embedding model classifies task_intent (cluster id over k=512 clusters)
+3.  HippoRAG: PPR over knowledge graph, top-k chunks retrieved
+4.  Hebbian H biases the tool-selection prior:
+       logits_tool += &lambda; &middot; H[task_intent, :] @ tool_embeddings
+5.  Forward pass through 24 hybrid layers:
+       for each layer L:
+           backbone_out = Mamba2(x) or DiffAttn(x)
+           memory_out   = TitansMLP(x, layer_id=L)
+           gate         = &sigma;(W_gate &middot; x)
+           x_next       = backbone_out + gate &odot; memory_out
+       at the 6 DiffAttn layers (4, 8, 12, 16, 20, 24):
+           x_next = x_next + cross_attn(x_next, retrieved_chunks)
+6.  Sampling temperature = base_T &middot; (1 + &alpha;&middot;frustration &minus; &beta;&middot;confidence)
+7.  Generate response (possibly invoking tools)
+8.  Tool execution; observe outputs and user reaction
+9.  Hormone scalars updated (EMA over recent outcomes)
+10. If Titans surprise &gt; &tau;_surprise(boredom): MLP gradient step
+11. If joy &gt; &tau;_joy AND interaction confirmed-positive:
+       Hebbian H update; LoRA online step with LR modulated by joy
+12. Every 100 online updates: canary eval; rollback if regressed
+13. Interaction buffered for nightly sleep-training</pre>
+
+<!-- ============================================================ -->
+<h2 id="training">Training Plan and Data Curriculum</h2>
+
+<p>The training plan follows a seven-stage progression. Stages 1&ndash;2 establish the base model; Stages 3&ndash;6 specialize it for the agent role; Stage 7 bootstraps the neuromodulatory signal in the absence of real user data.</p>
+
+<table>
+  <tr><th>Stage</th><th>Tokens</th><th>Data</th><th>Compute</th><th>Cost (USD)</th></tr>
+  <tr><td>1. Pretrain</td><td>60B</td><td>FineWeb-Edu / DCLM / Cosmopedia / OpenWebMath / code / wiki</td><td>8&times;H100 spot, ~10 days</td><td>800&ndash;1100</td></tr>
+  <tr><td>2. Long-context extension</td><td>5B</td><td>ProLong-64K + LongAlign + LongWriter</td><td>8&times;H100, 2 days</td><td>~150</td></tr>
+  <tr><td>3. General SFT</td><td>1B</td><td>SmolTalk + Tulu-3 selective</td><td>4&times;H100, 1 day</td><td>~80</td></tr>
+  <tr><td>4. Tool-calling SFT</td><td>200M</td><td>Glaive-FC-v2 + Hermes-FC + APIGen</td><td>4&times;H100, half day</td><td>~40</td></tr>
+  <tr><td>5. RAG SFT</td><td>200M</td><td>RAG-Instruct + ChatQA + Self-RAG + RAGTruth</td><td>4&times;H100, half day</td><td>~40</td></tr>
+  <tr><td>6. DPO preference</td><td>50M</td><td>UltraFeedback + Nectar subset</td><td>4&times;H100, half day</td><td>~40</td></tr>
+  <tr><td>7. Hormone/Hebbian bootstrap</td><td>&mdash;</td><td>UltraFeedback chosen/rejected as joy/frustration proxy; ~10k synthesized correction trajectories</td><td>CPU + 1&times;GPU eval</td><td>~20</td></tr>
+  <tr><td colspan="3"><strong>Total</strong></td><td><strong>~17 days wall-clock</strong></td><td><strong>1170&ndash;1470</strong></td></tr>
+</table>
+
+<h3>6.2 &nbsp;Pretraining data mix</h3>
+
+<table>
+  <tr><th>%</th><th>Dataset</th><th>HuggingFace path</th><th>License</th></tr>
+  <tr><td>40</td><td>FineWeb-Edu</td><td><code>HuggingFaceFW/fineweb-edu</code></td><td>ODC-By</td></tr>
+  <tr><td>20</td><td>DCLM-baseline</td><td><code>mlfoundations/dclm-baseline-1.0</code></td><td>CC-BY-4</td></tr>
+  <tr><td>15</td><td>Cosmopedia-v2</td><td><code>HuggingFaceTB/cosmopedia</code></td><td>Apache-2</td></tr>
+  <tr><td>10</td><td>OpenWebMath</td><td><code>open-web-math/open-web-math</code></td><td>ODC-By</td></tr>
+  <tr><td>8</td><td>The Stack v2 (filtered)</td><td><code>bigcode/the-stack-v2-dedup</code></td><td>permissive mix</td></tr>
+  <tr><td>5</td><td>OpenCoder corpus</td><td><code>OpenCoder-LLM/opc-fineweb-code-corpus</code></td><td>Apache-2</td></tr>
+  <tr><td>2</td><td>Wikipedia + books</td><td><code>wikimedia/wikipedia</code>, <code>Skylion007/openwebtext</code></td><td>CC-BY-SA</td></tr>
+</table>
+
+<p>The mix tilts heavier on code, math, and Phi-style synthetic content than the standard Chinchilla recipe, reflecting the consistent SLM finding that per-token information density matters more than token count once a model is small.</p>
+
+<!-- ============================================================ -->
+<h2 id="eval">Evaluation Suite and Ablation Matrix</h2>
+
+<h3>7.1 &nbsp;Standard benchmarks</h3>
+
+<table>
+  <tr><th>Claim under test</th><th>Benchmark</th><th>Metric</th></tr>
+  <tr><td>Backbone language modeling</td><td>C4, SlimPajama validation</td><td>nats/byte</td></tr>
+  <tr><td>Common-sense reasoning</td><td>lm-eval-harness 7-task suite (LAMBADA, HellaSwag, PIQA, ARC-e/c, WinoGrande, OpenBookQA)</td><td>accuracy</td></tr>
+  <tr><td>Associative recall</td><td>MQAR (Zoology)</td><td>accuracy at seq lengths 256&ndash;8192</td></tr>
+  <tr><td>Long-context retrieval</td><td>RULER, Needle-in-a-Haystack at 4k/16k/32k</td><td>retrieval accuracy</td></tr>
+  <tr><td>Titans contribution</td><td>BABILong, S-NIAH 64k</td><td>accuracy</td></tr>
+  <tr><td>HippoRAG contribution</td><td>MuSiQue, 2WikiMultiHopQA, HotpotQA</td><td>EM, F1, recall@2</td></tr>
+  <tr><td>Tool calling</td><td>Berkeley Function Calling Leaderboard v3</td><td>AST + executable accuracy</td></tr>
+  <tr><td>Continual learning</td><td>TRACE (8 sequential tasks)</td><td>BWT, FWT, average accuracy</td></tr>
+  <tr><td>End-to-end agent</td><td>GAIA Level 1</td><td>task success rate</td></tr>
+</table>
+
+<h3>7.2 &nbsp;Paper-original custom probes</h3>
+
+<p>Four probes do not exist in the literature and must be invented:</p>
+
+<ol>
+  <li><strong>MAG memory-attention probe.</strong> A needle is planted in the Titans memory state via a surprise-triggered update (not via context). The probe queries the model k forward passes later and measures recall.</li>
+  <li><strong>Hormone gating eval.</strong> Stability-plasticity probe: alternate a stable task with a novel task; measure forgetting on the stable task while learning the novel one. Compare hormones-on vs hormones-off.</li>
+  <li><strong>Joint retrieval-writeback eval.</strong> Stream new documents into HippoRAG; query the implied facts; measure how knowledge-graph mutation under load affects downstream QA accuracy.</li>
+  <li><strong>Online-LoRA tool-schema retention.</strong> A composition of BFCL and TRACE: do continual updates on miscellaneous tasks corrupt the model&apos;s tool-calling competence acquired in Stage 4 SFT?</li>
+</ol>
+
+<h3>7.3 &nbsp;Ablation matrix</h3>
+
+<p>Two factorial ablation sets are required for paper credibility:</p>
+
+<table>
+  <tr><th>Configuration</th><th>Memory tiers active</th><th>Hypothesis under test</th></tr>
+  <tr><td>A. Backbone only</td><td>none</td><td>Hybrid SSM+DiffAttn baseline</td></tr>
+  <tr><td>B. + HippoRAG</td><td>Tier 1</td><td>External graph alone</td></tr>
+  <tr><td>C. + Titans</td><td>Tier 2</td><td>Parametric memory alone</td></tr>
+  <tr><td>D. + HippoRAG + Titans</td><td>Tiers 1+2</td><td>Symbolic + parametric memory</td></tr>
+  <tr><td>E. Full system</td><td>all tiers</td><td>Three timescales + neuromodulation</td></tr>
+</table>
+
+<p>A second, smaller factorial isolates the modulators:</p>
+
+<table>
+  <tr><th>Run</th><th>Hormones</th><th>Hebbian H</th><th>LoRA rollback</th></tr>
+  <tr><td>F1</td><td>off</td><td>off</td><td>off</td></tr>
+  <tr><td>F2</td><td>on</td><td>off</td><td>off</td></tr>
+  <tr><td>F3</td><td>off</td><td>on</td><td>off</td></tr>
+  <tr><td>F4</td><td>off</td><td>off</td><td>on</td></tr>
+  <tr><td>F5&ndash;F8</td><td colspan="3">remaining combinations &mdash; identifies which modulator is load-bearing</td></tr>
+</table>
+
+<p>Plus three compute-matched external baselines: Samba-700M, Llama-3.2-1B with off-the-shelf dense RAG, and a Titans-MAG-700M built on a pure-attention backbone (this isolates the contribution of the hybrid backbone itself).</p>
+
+<!-- ============================================================ -->
+<h2 id="risks">Risks and Mitigations</h2>
+
+<table>
+  <tr><th>Risk</th><th>Severity</th><th>Mitigation</th></tr>
+  <tr><td>Pure SSM hurts precise recall on tool-calling and structured output</td><td>High</td><td>Diff-attn layers are placed as precision checkpoints exactly where recall matters; ablation will verify.</td></tr>
+  <tr><td>MAG memory destabilizes training during pretrain</td><td>High</td><td>Gate is zero-initialized so memory contributes nothing at start; ramps up over the first 5B tokens.</td></tr>
+  <tr><td>Online LoRA collapses the model</td><td>High</td><td>Frozen base + snapshot ring of 8 + canary eval every 100 updates + automatic rollback on &gt;5% metric drop.</td></tr>
+  <tr><td>Reward signal hacking (model learns to produce outputs that trigger joy)</td><td>Medium</td><td>Joy is computed only from <em>user-confirmed</em> outcomes, never from self-evaluation; tool calls must succeed in execution, not merely parse.</td></tr>
+  <tr><td>HippoRAG graph extraction noisy</td><td>Medium</td><td>Phi-3-mini IE with confidence filtering; embedding-based triple deduplication; periodic graph audit.</td></tr>
+  <tr><td>Hebbian H develops &ldquo;ruts&rdquo; (over-strong associations)</td><td>Medium</td><td>Frustration-driven decay multiplier; absolute cap on H entries; H is inspectable so anomalies are detectable.</td></tr>
+  <tr><td>Compute overrun</td><td>Medium</td><td>Stage gating &mdash; do not proceed to long-context extension until pretrain PPL hits target; abort early if Stage 1 underperforms baseline by &gt;10%.</td></tr>
+  <tr><td>Reviewers doubt novelty (&ldquo;just an integration paper&rdquo;)</td><td>Medium</td><td>Frame around the unifying neuromodulatory thesis, not the constituent blocks; provide 8-run factorial ablation isolating which modulators are load-bearing.</td></tr>
+  <tr><td>Tokenizer mismatch hurts SFT data quality</td><td>Low</td><td>Phi-3 tokenizer chosen for breadth; 16 added special tokens validated by checking they round-trip through all SFT corpora.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="discussion">Discussion and Publishability</h2>
+
+<h3>9.1 &nbsp;Where the novelty actually sits</h3>
+
+<p>None of the individual blocks in this design is new. Mamba2 hybrids are well-studied; Titans MAG is a year old at submission; HippoRAG is a year old; differential attention is six months old; Granite tool calling is a known training recipe; Hebbian fast weights have a forty-year lineage; LoRA snapshot rollback is engineering folklore by now. <em>Combining</em> these is also not, in itself, new &mdash; many groups stitch together components.</p>
+
+<p>What appears to be original, after our literature audit, is the specific claim that <em>three independent memory systems operating at three distinct timescales can be coherently scheduled by a single neuromodulatory affect signal</em>. The closest prior work modulates activations (HormoneT5, NMG-Transformer) or modulates a single learning system (online LoRA, Hebbian transformers). No published work uses one affect signal to gate writes simultaneously across symbolic graph memory, test-time-trained neural memory, fast-weight Hebbian memory, and slow-weight LoRA memory. This is the publishable thesis.</p>
+
+<h3>9.2 &nbsp;Venue and audience</h3>
+
+<p>The most natural venue is the Conference on Language Modeling (COLM) 2026, whose scope explicitly includes small-model methods, memory, and training procedures. NeurIPS 2026 main track is plausible if the ablation set is unusually strong. ICLR 2027 works if framed architecturally. The Workshops on Babylm and Memory in NLP at EMNLP serve as fallbacks if main-track venues reject on integration-paper grounds.</p>
+
+<h3>9.3 &nbsp;Honest assessment of risk to the thesis</h3>
+
+<p>Three weaknesses a reviewer will probe:</p>
+
+<ol>
+  <li><strong>&ldquo;You can&apos;t prove the hormones are doing anything load-bearing.&rdquo;</strong> Mitigated by the 2&sup3; modulator factorial; we expect at least the Hebbian on/off and rollback on/off axes to show clear effects.</li>
+  <li><strong>&ldquo;Three memory systems is two too many.&rdquo;</strong> Mitigated by the five-condition memory factorial; we expect each tier to contribute on a distinct benchmark (HippoRAG on multi-hop QA, Titans on BABILong, Hebbian on TRACE-style continual eval).</li>
+  <li><strong>&ldquo;A 700M model is too small for these effects to be visible.&rdquo;</strong> The honest response is that this is a learning-vehicle paper as much as a contribution paper. We acknowledge scale as a limitation and present the model as a proof of architectural concept, not a frontier system.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="refs">References</h2>
+
+<div class="references">
+<ol>
+  <li>Dao, T., Gu, A. (2024). <em>Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality.</em> arXiv:2405.21060.</li>
+  <li>Ye, T., Dong, L., Xia, Y., Sun, Y., Zhu, Y., Huang, G., Wei, F. (2024). <em>Differential Transformer.</em> arXiv:2410.05258. ICLR 2025.</li>
+  <li>Ren, L., Liu, Y., Lu, Y., Shen, Y., Liang, C., Chen, W. (2024). <em>Samba: Simple Hybrid State Space Models for Efficient Unlimited Context Language Modeling.</em> arXiv:2406.07522. ICLR 2025.</li>
+  <li>Behrouz, A., Zhong, P., Mirrokni, V. (2024). <em>Titans: Learning to Memorize at Test Time.</em> arXiv:2501.00663.</li>
+  <li>Gutiérrez, B. J., Shu, Y., Gu, Y., Yasunaga, M., Su, Y. (2024). <em>HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models.</em> arXiv:2405.14831. NeurIPS 2024.</li>
+  <li>IBM Research (2024). <em>Granite 3.0 Language Models.</em> Technical Report.</li>
+  <li>HormoneT5 / HELT (2026). <em>Hormone-Modulated Transformer for Adaptive Language Modeling.</em> arXiv:2605.13858.</li>
+  <li>(2025). <em>Hebbian and Gradient-Based Plasticity Enables Robust Few-Shot Adaptation in Transformers.</em> arXiv:2510.21908.</li>
+  <li>Gu, A., Goel, K., Ré, C. (2022). <em>Efficiently Modeling Long Sequences with Structured State Spaces.</em> ICLR 2022.</li>
+  <li>Arora, S., Eyuboglu, S., Zhang, M., Timalsina, A., Alberti, S., Zinsley, D., Zou, J., Rudra, A., Ré, C. (2024). <em>Simple linear attention language models balance the recall-throughput tradeoff.</em> ICML 2024. (MQAR benchmark.)</li>
+  <li>AI21 Labs (2024). <em>Jamba: A Hybrid Transformer-Mamba Language Model.</em> arXiv:2403.19887.</li>
+  <li>Zyphra (2024). <em>Zamba2: Small Hybrid Models with Shared Attention.</em> Technical Report.</li>
+  <li>Dong, X. et al., NVIDIA (2024). <em>Hymba: A Hybrid-head Architecture for Small Language Models.</em> arXiv:2411.13676.</li>
+  <li>Gunasekar, S., Zhang, Y., Aneja, J., Mendes, C. C. T., et al. (2023). <em>Textbooks Are All You Need.</em> arXiv:2306.11644. (Phi-1.)</li>
+  <li>Berkeley Function Calling Leaderboard (2024). <em>BFCL v3.</em> gorilla-llm.github.io.</li>
+  <li>Wu, B., Gutiérrez, B. J., Su, Y. (2025). <em>From RAG to Memory: Non-Parametric Continual Learning for Large Language Models.</em>.</li>
+  <li>(2025). <em>Titans Revisited: A Reproduction Study with Hybrid Backbones.</em> arXiv:2510.09551.</li>
+  <li>(2023). <em>Neuromodulation Gated Transformer.</em> arXiv:2305.03232.</li>
+  <li>Munkhdalai, T., Sordoni, A., Wang, T., Trischler, A. (2018). <em>Metalearned Neural Memory.</em> NeurIPS 2018.</li>
+  <li>(2025). <em>AutoTool: A Trajectory-Graph Approach to Tool Selection.</em> arXiv:2511.14650.</li>
+  <li>Wu, T., Caccia, M., Li, Z., Li, Y.-F., Qi, G., Haffari, G. (2024). <em>Continual Learning for Large Language Models: A Survey.</em></li>
+  <li>Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen, W. (2021). <em>LoRA: Low-Rank Adaptation of Large Language Models.</em> arXiv:2106.09685.</li>
+  <li>(2025). <em>Online-LoRA: Training-Free Long-Context Continual Adaptation.</em> WACV 2025.</li>
+  <li>Wang, X. et al. (2024). <em>TRACE: A Comprehensive Benchmark for Continual Learning in Large Language Models.</em> arXiv:2310.06762.</li>
+</ol>
+</div>
+
+<hr>
+<p style="text-align:center; font-size:0.85em; color:var(--soft); font-style:italic;">
+End of design report. Companion machine-readable spec at<br>
+<code>docs/superpowers/specs/2026-05-28-frankenstein-slm-design.md</code>
+</p>
+
+</body>
+</html>
