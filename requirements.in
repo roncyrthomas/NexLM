@@ -20,7 +20,9 @@ tqdm>=4.65
 pyyaml>=6.0
 
 # Agent layer (P1+)
-peft>=0.13  # LoRA adapters via PEFT
+peft>=0.13   # LoRA adapters via PEFT
+networkx>=3.0  # HippoRAG knowledge graph
+scipy>=1.10    # required by networkx for sparse PageRank
 # bitsandbytes: install on Linux/cloud only — Windows support is unreliable
 #   pip install bitsandbytes  # cloud only
 
