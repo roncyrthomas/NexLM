@@ -88,6 +88,36 @@ class ToolRegistry:
             "parameters": parameters or {"type": "object", "properties": {}},
         }
 
+    def clear(self) -> None:
+        """Drop all registered tools. Call between benchmark examples that use
+        different tool catalogues so prior turns' tools don't leak into the
+        current decision."""
+        self.tools.clear()
+        self.specs.clear()
+
+    def register_many(self, specs: list[dict], stub: bool = True) -> None:
+        """Bulk-register from a list of {name, description, parameters} dicts.
+
+        Used by benchmark adapters. `stub=True` registers a no-op callable —
+        appropriate for evals where we only score whether the model picks the
+        right tool name, not whether the tool runs.
+        """
+        for spec in specs:
+            name = spec.get("name") or spec.get("function_name") or ""
+            if not name:
+                continue
+            params = spec.get("parameters")
+            if params is None:
+                params = spec.get("function", {}).get("parameters") if isinstance(spec.get("function"), dict) else None
+            if params is None:
+                params = {"type": "object", "properties": {}}
+            self.register(
+                name,
+                (lambda **kw: {"stub": True}) if stub else (lambda **kw: None),
+                description=spec.get("description", ""),
+                parameters=params if isinstance(params, dict) else {"type": "object", "properties": {}},
+            )
+
     def execute(self, call: ToolCall) -> ToolResponse:
         if call.name not in self.tools:
             return ToolResponse(result=None, error=f"unknown tool: {call.name}")

@@ -37,6 +37,14 @@ class AgentConfig:
     enable_titans: bool = False       # Tier 2 (P4)
     train_lora_online: bool = False   # Tier 3 runtime updates (P2 paired with hormones)
 
+    # ─── Tier 2 (Titans MAG) — per-layer placement ────────────────────────
+    # Which transformer block(s) the Titans hook attaches to. Negative indices
+    # count from the back (-1 = last). A list allows multi-layer ablations.
+    titans_layer_indices: list[int] = field(default_factory=lambda: [-1])
+    titans_d_hidden: int = 2048
+    titans_eta: float = 1e-3
+    titans_tau_surprise: float = 0.5
+
     # ─── Inference defaults ────────────────────────────────────────────────
     max_new_tokens: int = 256
     temperature: float = 0.7

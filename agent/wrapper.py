@@ -61,12 +61,21 @@ class NexAgent(nn.Module):
         if cfg.enable_hipporag and HAVE_HIPPORAG:
             self.hipporag = HippoRAG()
         self.titans: TitansMAG | None = None
-        self._titans_hook = None
+        self._titans_hooks: list = []  # one hook per attached layer
         if cfg.enable_titans:
             d_model = self._infer_d_model()
-            self.titans = TitansMAG(d_model=d_model)
-            # attach to a mid-depth block of the base model
-            self._titans_hook = self.titans.attach_to_base(self.base, layer_index=-1)
+            self.titans = TitansMAG(
+                d_model=d_model,
+                d_hidden=cfg.titans_d_hidden,
+                eta=cfg.titans_eta,
+                tau_surprise=cfg.titans_tau_surprise,
+            )
+            # Attach to every configured layer index. Ablation studies vary this:
+            # [-1]      = top of stack only
+            # [-1, -8]  = top + mid-depth
+            # [0, 8, 16, 24] = early/mid/late/top
+            for li in cfg.titans_layer_indices:
+                self._titans_hooks.append(self.titans.attach_to_base(self.base, layer_index=li))
 
         # ─── Tools registry — always present (cheap; may be unused) ────
         self.tools = ToolRegistry()
