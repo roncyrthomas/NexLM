@@ -19,6 +19,11 @@ wandb>=0.27
 tqdm>=4.65
 pyyaml>=6.0
 
+# Agent layer (P1+)
+peft>=0.13  # LoRA adapters via PEFT
+# bitsandbytes: install on Linux/cloud only — Windows support is unreliable
+#   pip install bitsandbytes  # cloud only
+
 # Testing
 pytest>=9.0
 pytest-xdist>=3.5
