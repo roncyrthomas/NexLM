@@ -35,6 +35,13 @@ except ImportError:
 
 from agent.titans import TitansMAG
 
+# Frank v2 tiers (each optional; instantiated only when its flag is on)
+from agent.predictive import PredictiveCoder, predict_next_user_input
+from agent.episodic import EpisodicMemory
+from agent.habits import HabitsCache
+from agent.dreamer import Dreamer
+from agent.metaplastic import MetaPlastic
+
 
 _DTYPE_MAP = {
     "bfloat16": torch.bfloat16,
@@ -76,6 +83,40 @@ class NexAgent(nn.Module):
             # [0, 8, 16, 24] = early/mid/late/top
             for li in cfg.titans_layer_indices:
                 self._titans_hooks.append(self.titans.attach_to_base(self.base, layer_index=li))
+
+        # ─── Frank v2 tiers ─────────────────────────────────────────────
+        self.predictive: PredictiveCoder | None = (
+            PredictiveCoder() if cfg.enable_predictive else None
+        )
+        self.episodic: EpisodicMemory | None = (
+            EpisodicMemory(
+                max_size=cfg.episodic_buffer_size,
+                similarity_threshold=cfg.episodic_similarity_threshold,
+            )
+            if cfg.enable_episodic
+            else None
+        )
+        self.habits: HabitsCache | None = (
+            HabitsCache(
+                compile_threshold=cfg.habits_compile_threshold,
+                reward_threshold=cfg.habits_reward_threshold,
+            )
+            if cfg.enable_habits
+            else None
+        )
+        self.dreamer: Dreamer | None = (
+            Dreamer(n_samples_per_dream=cfg.dream_n_samples)
+            if cfg.enable_dreamer
+            else None
+        )
+        self.metaplastic: MetaPlastic | None = (
+            MetaPlastic(
+                alpha_up=cfg.metaplastic_alpha_up,
+                alpha_down=cfg.metaplastic_alpha_down,
+            )
+            if cfg.enable_metaplastic
+            else None
+        )
 
         # ─── Tools registry — always present (cheap; may be unused) ────
         self.tools = ToolRegistry()
@@ -161,13 +202,54 @@ class NexAgent(nn.Module):
         out = self.base.generate(ids, **defaults)
         return self.tokenizer.decode(out[0], skip_special_tokens=True)
 
-    def turn(self, user_query: str, retrieve: bool = True, **gen_kwargs) -> dict:
-        """One full agent turn: retrieve → render → modulate → generate → update.
+    def turn(self, user_query: str, retrieve: bool = True, intent_id: int | None = None, **gen_kwargs) -> dict:
+        """One full agent turn — pipeline order matches the v2 spec.
 
-        Returns a dict:
-            {response, tool_calls, retrieved_chunks, hormone_state}
+        Order:
+          1. Habit check    (v2): if compiled triple matches, BYPASS generation.
+          2. Episodic recall (v2): KNN past similar situations as few-shot hint.
+          3. HippoRAG retrieve (v1): KG retrieval.
+          4. Tool descriptions (v1): catalogue rendering.
+          5. Hormone-modulated temperature (v1).
+          6. Predictive forecast (v2): cache next-user prediction for surprise scoring.
+          7. Generate.
+          8. Parse + return.
         """
-        # 1. Retrieve context (HippoRAG)
+        bypassed = False
+
+        # 1. Habit bypass (v2)
+        if self.habits is not None and intent_id is not None:
+            frust = self.hormones.frustration if self.hormones is not None else 0.0
+            habit = self.habits.maybe_bypass(intent_id, frustration=frust)
+            if habit is not None and habit.cached_response:
+                # Habit fires — return cached response, skip generation entirely
+                return {
+                    "prompt": user_query,
+                    "response": habit.cached_response,
+                    "tool_calls": parse_tool_calls(habit.cached_response),
+                    "retrieved_chunks": [],
+                    "episodic_hits": [],
+                    "habit_fired": True,
+                    "hormone_state": self.hormones.to_dict() if self.hormones else None,
+                }
+
+        # 2. Episodic recall (v2)
+        episodic_hits = []
+        episodic_block = ""
+        if self.episodic is not None and self.episodic.is_familiar(user_query):
+            episodic_hits = self.episodic.recall(user_query, k=3)
+            positive_hits = [e for e in episodic_hits if e.reward > 0]
+            if positive_hits:
+                episodic_block = (
+                    "Similar past examples that worked:\n"
+                    + "\n".join(
+                        f"  Q: {e.query}\n  A: {e.response[:200]}"
+                        for e in positive_hits[:2]
+                    )
+                    + "\n\n"
+                )
+
+        # 3. HippoRAG retrieve (v1)
         retrieved = []
         ctx_block = ""
         if retrieve and self.hipporag is not None:
@@ -181,28 +263,40 @@ class NexAgent(nn.Module):
                         + "\n</retrieve>\n"
                     )
             except Exception:
-                pass  # graceful degradation if graph not built yet
+                pass
 
-        # 2. Render tools available (if any are registered)
+        # 4. Tool descriptions
         tools_block = self.tools.render_descriptions() + "\n" if self.tools.tools else ""
 
-        # 3. Modulate sampling temperature with hormones
+        # 5. Hormone-modulated temperature
         gen_kwargs = dict(gen_kwargs)
         if self.hormones is not None:
-            gen_kwargs.setdefault("temperature", self.hormones.sampling_temperature(self.cfg.temperature))
+            gen_kwargs.setdefault(
+                "temperature", self.hormones.sampling_temperature(self.cfg.temperature)
+            )
 
-        # 4. Compose prompt + generate
-        prompt = tools_block + ctx_block + f"User: {user_query}\nAssistant: "
+        # 6. Predictive forecast — cache for surprise scoring at next turn
+        if self.predictive is not None:
+            try:
+                conversation = [{"role": "user", "content": user_query}]
+                logits = predict_next_user_input(self.base, self.tokenizer, conversation)
+                self.predictive.predict_from_logits(logits)
+            except Exception:
+                pass
+
+        # 7. Generate
+        prompt = tools_block + ctx_block + episodic_block + f"User: {user_query}\nAssistant: "
         response = self.generate(prompt, **gen_kwargs)
 
-        # 5. Parse out tool calls
+        # 8. Parse + return
         tool_calls = parse_tool_calls(response)
-
         return {
             "prompt": prompt,
             "response": response,
             "tool_calls": tool_calls,
             "retrieved_chunks": retrieved,
+            "episodic_hits": episodic_hits,
+            "habit_fired": False,
             "hormone_state": self.hormones.to_dict() if self.hormones else None,
         }
 
@@ -211,19 +305,83 @@ class NexAgent(nn.Module):
         reward: float = 0.0,
         retry_signal: float = 0.0,
         active_features: list[int] | None = None,
-    ) -> None:
-        """Feed an outcome back into the agent layer.
+        last_user_query: str | None = None,
+        last_response: str | None = None,
+        next_user_message: str | None = None,
+        intent_id: int | None = None,
+        tool_id: int | None = None,
+        shape_id: int | None = None,
+    ) -> dict:
+        """Feed an outcome back into the agent layer. Returns diagnostic dict.
 
-        Hormones update from (reward, retry_signal). If the turn was
-        positively reinforced (joy > τ, frustration < τ), the Hebbian
-        co-firing matrix strengthens the pairs in `active_features`.
+        v1 effects:
+          - Hormones update from (reward, retry_signal).
+          - Hebbian H strengthens active feature pairs on joy > τ.
+
+        v2 effects:
+          - Predictive surprise (from next_user_message) feeds hormones.
+          - Episodic stores (last_user_query, last_response, reward).
+          - Habits observe (intent_id, tool_id, shape_id, reward).
+          - Metaplastic credits eta[i,j] for recently-updated pairs.
+          - Dreamer may fire if fatigue threshold reached.
         """
+        diag = {}
+
+        # v2: predictive surprise from next user message
+        predictive_surprise = 0.5
+        if self.predictive is not None and next_user_message:
+            predictive_surprise = self.predictive.observe_text(
+                next_user_message, self.tokenizer
+            )
+            diag["predictive_surprise"] = predictive_surprise
+
+        # v1: hormone update (now also takes predictive surprise as variance proxy)
         if self.hormones is not None:
-            self.hormones.update(reward=reward, retry_signal=retry_signal)
+            self.hormones.update(
+                reward=reward,
+                retry_signal=retry_signal,
+                surprise_variance=1.0 / (predictive_surprise + 1e-3),
+            )
+
+        # v1: Hebbian
         if self.hebbian is not None and active_features:
             joy = self.hormones.joy if self.hormones else max(0.0, reward)
             frust = self.hormones.frustration if self.hormones else max(0.0, -reward)
-            self.hebbian.update(active_features, joy=joy, frustration=frust)
+            n_changed = self.hebbian.update(active_features, joy=joy, frustration=frust)
+            diag["hebbian_pairs_changed"] = n_changed
+            # v2: metaplastic credit on the same active features
+            if self.metaplastic is not None:
+                self.metaplastic.record_update(active_features)
+                self.metaplastic.credit_outcome(reward)
+
+        # v2: episodic store
+        if self.episodic is not None and last_user_query and last_response:
+            self.episodic.remember(last_user_query, last_response, reward=reward)
+            diag["episodic_size"] = len(self.episodic.episodes)
+
+        # v2: habits observe
+        if (
+            self.habits is not None
+            and intent_id is not None
+            and tool_id is not None
+            and shape_id is not None
+        ):
+            self.habits.observe(
+                intent_id, tool_id, shape_id, reward=reward, cached_response=last_response
+            )
+            self.habits.tick()
+            diag["habits"] = self.habits.stats()
+
+        # v2: dream consolidation
+        if (
+            self.dreamer is not None
+            and self.hormones is not None
+            and self.dreamer.should_dream(self.hormones)
+        ):
+            stats = self.dreamer.dream(self)
+            diag["dream"] = stats
+
+        return diag
 
     # ────────────────────────────────────────────────────────────────────
     # Persistence (LoRA + Hebbian + hormones)

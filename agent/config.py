@@ -45,6 +45,22 @@ class AgentConfig:
     titans_eta: float = 1e-3
     titans_tau_surprise: float = 0.5
 
+    # ─── Frank v2 — self-derived learning tier toggles ────────────────────
+    enable_predictive: bool = False    # Tier P (V2.1)
+    enable_episodic: bool = False      # Tier E (V2.2)
+    enable_habits: bool = False        # Tier H (V2.3)
+    enable_dreamer: bool = False       # Tier D (V2.4)
+    enable_metaplastic: bool = False   # Tier M (V2.5)
+
+    # Frank v2 hyperparams
+    episodic_buffer_size: int = 10_000
+    episodic_similarity_threshold: float = 0.85
+    habits_compile_threshold: int = 10
+    habits_reward_threshold: float = 0.7
+    dream_n_samples: int = 64
+    metaplastic_alpha_up: float = 0.05
+    metaplastic_alpha_down: float = 0.03
+
     # ─── Inference defaults ────────────────────────────────────────────────
     max_new_tokens: int = 256
     temperature: float = 0.7
@@ -72,3 +88,32 @@ class AgentConfig:
         return cls(
             base_model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         )
+
+    # ─── Three-way comparison presets (the paper's actual A/B/C) ─────────
+    @classmethod
+    def vanilla(cls, base: str | None = None) -> "AgentConfig":
+        """Baseline — LoRA only, no agent layer tiers."""
+        cfg = cls() if base is None else cls(base_model_name=base)
+        return cfg
+
+    @classmethod
+    def frank_v1(cls, base: str | None = None) -> "AgentConfig":
+        """Frank v1 — external-reward-driven agent layer."""
+        cfg = cls() if base is None else cls(base_model_name=base)
+        cfg.enable_hormones = True
+        cfg.enable_hebbian = True
+        cfg.enable_hipporag = True
+        cfg.enable_titans = True
+        cfg.train_lora_online = True
+        return cfg
+
+    @classmethod
+    def frank_v2(cls, base: str | None = None) -> "AgentConfig":
+        """Frank v2 — adds self-derived learning signals."""
+        cfg = cls.frank_v1(base=base)
+        cfg.enable_predictive = True
+        cfg.enable_episodic = True
+        cfg.enable_habits = True
+        cfg.enable_dreamer = True
+        cfg.enable_metaplastic = True
+        return cfg

@@ -1,10 +1,11 @@
-"""Unified eval runner.
+"""Unified eval runner with three-way comparison.
 
 All benchmarks implement a common interface:
     score = bench.run(agent, max_examples=N) -> dict[str, float]
 
 This file routes the benchmark name to the implementation and aggregates
-results into a single comparison table.
+results. The headline function is compare_three() — runs Vanilla / Frank v1
+/ Frank v2 on the same benchmarks and reports per-metric deltas.
 """
 
 from __future__ import annotations
@@ -33,7 +34,6 @@ def run_one(agent: NexAgent, benchmark: str, max_examples: int = 100) -> dict:
 
 
 def run_all(agent: NexAgent, max_examples: int = 100, output_dir: str = "evals/results") -> dict:
-    """Run every registered benchmark on this agent."""
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     results = {}
@@ -52,15 +52,9 @@ def run_all(agent: NexAgent, max_examples: int = 100, output_dir: str = "evals/r
 
 
 def compare(agent_a: NexAgent, agent_b: NexAgent, max_examples: int = 100) -> dict:
-    """A/B comparison — the bread and butter of the pivoted paper.
-
-    Returns per-benchmark deltas: agent_b - agent_a.
-    """
-    print("[compare] running benchmarks on agent_a (baseline)...")
+    """Pairwise A/B comparison."""
     a = {name: fn(agent_a, max_examples) for name, fn in BENCHMARK_REGISTRY.items()}
-    print("[compare] running benchmarks on agent_b (treatment)...")
     b = {name: fn(agent_b, max_examples) for name, fn in BENCHMARK_REGISTRY.items()}
-
     delta = {}
     for name in BENCHMARK_REGISTRY:
         delta[name] = {}
@@ -68,6 +62,69 @@ def compare(agent_a: NexAgent, agent_b: NexAgent, max_examples: int = 100) -> di
             if isinstance(a[name][metric], (int, float)):
                 delta[name][metric] = b[name][metric] - a[name][metric]
     return {"agent_a": a, "agent_b": b, "delta": delta}
+
+
+def compare_three(
+    vanilla: NexAgent,
+    frank_v1: NexAgent,
+    frank_v2: NexAgent,
+    benchmarks: list[str] | None = None,
+    max_examples: int = 100,
+    output_dir: str = "evals/results",
+) -> dict:
+    """Three-way comparison — the paper's load-bearing experiment.
+
+    Returns a structured dict:
+        {
+            "vanilla":   {bench_name: metrics, ...},
+            "frank_v1":  {bench_name: metrics, ...},
+            "frank_v2":  {bench_name: metrics, ...},
+            "delta_v1_vs_vanilla": {bench_name: {metric: float}, ...},
+            "delta_v2_vs_v1":      {bench_name: {metric: float}, ...},
+            "delta_v2_vs_vanilla": {bench_name: {metric: float}, ...},
+        }
+    """
+    benches = benchmarks or list(BENCHMARK_REGISTRY.keys())
+    benches = [b for b in benches if b in BENCHMARK_REGISTRY]
+
+    def _run(agent, label):
+        out = {}
+        for name in benches:
+            print(f"\n[compare_three] {label} :: {name}")
+            try:
+                out[name] = BENCHMARK_REGISTRY[name](agent, max_examples)
+            except Exception as e:
+                out[name] = {"error": str(e)}
+        return out
+
+    a = _run(vanilla, "vanilla")
+    b = _run(frank_v1, "frank_v1")
+    c = _run(frank_v2, "frank_v2")
+
+    def _delta(x, y):
+        d = {}
+        for name in benches:
+            d[name] = {}
+            xn, yn = x.get(name, {}), y.get(name, {})
+            for metric in xn:
+                if isinstance(xn[metric], (int, float)) and metric in yn and isinstance(yn[metric], (int, float)):
+                    d[name][metric] = yn[metric] - xn[metric]
+        return d
+
+    results = {
+        "vanilla": a,
+        "frank_v1": b,
+        "frank_v2": c,
+        "delta_v1_vs_vanilla": _delta(a, b),
+        "delta_v2_vs_v1": _delta(b, c),
+        "delta_v2_vs_vanilla": _delta(a, c),
+    }
+
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "compare_three.json", "w") as f:
+        json.dump(results, f, indent=2)
+    return results
 
 
 # Auto-import concrete benchmarks so their @register decorators fire

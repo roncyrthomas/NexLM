@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NexLM Quickstart — Vanilla, Frank v1, Frank v2</title>
+<style>
+:root {
+  --ink: #1a1a1a;
+  --paper: #fdfcf8;
+  --accent: #8b1e1e;
+  --rule: #d4cfc4;
+  --soft: #5a5a5a;
+  --code: #f4f1ea;
+  --vanilla: #5a5a5a;
+  --v1: #3a6b8b;
+  --v2: #8b1e1e;
+  --good: #2d5a3d;
+  --warn: #b8893a;
+}
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  background: var(--paper);
+  color: var(--ink);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5em 1.5em 6em;
+  line-height: 1.65;
+}
+header.titleblock {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 1.5em;
+  margin-bottom: 2.5em;
+}
+h1 {
+  font-size: 2em;
+  margin: 0 0 0.3em;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  font-style: italic;
+  color: var(--soft);
+  font-size: 1.05em;
+}
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.3em;
+  margin-top: 2.5em;
+  margin-bottom: 0.8em;
+  counter-increment: section;
+}
+h2::before {
+  content: counter(section) ". ";
+  color: var(--accent);
+  font-weight: bold;
+}
+body { counter-reset: section; }
+h3 {
+  font-size: 1.15em;
+  margin-top: 1.8em;
+  margin-bottom: 0.4em;
+  font-style: italic;
+}
+h4 {
+  font-size: 1em;
+  margin-top: 1.3em;
+  margin-bottom: 0.3em;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+p { margin: 0.7em 0; }
+code {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  background: var(--code);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.88em;
+}
+pre {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  background: var(--code);
+  border-left: 3px solid var(--rule);
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.5;
+  border-radius: 2px;
+}
+pre code { background: none; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2em 0;
+  font-size: 0.9em;
+}
+th, td {
+  text-align: left;
+  padding: 0.5em 0.7em;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+th {
+  background: var(--code);
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--ink);
+  font-size: 0.85em;
+}
+.tag-vanilla, .tag-v1, .tag-v2 {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border-radius: 3px;
+  font-size: 0.78em;
+  font-weight: bold;
+  color: white;
+}
+.tag-vanilla { background: var(--vanilla); }
+.tag-v1 { background: var(--v1); }
+.tag-v2 { background: var(--v2); }
+.figure {
+  margin: 1.8em 0;
+  text-align: center;
+}
+.figure svg {
+  max-width: 100%;
+  height: auto;
+}
+.figure .caption {
+  font-size: 0.85em;
+  font-style: italic;
+  color: var(--soft);
+  margin-top: 0.7em;
+  text-align: center;
+  padding: 0 2em;
+}
+.toc {
+  background: var(--code);
+  padding: 1em 1.4em;
+  border-left: 3px solid var(--warn);
+  margin: 1.5em 0 2.5em;
+  font-size: 0.92em;
+}
+.toc ol { padding-left: 1.5em; margin: 0.4em 0; }
+.toc a { color: var(--ink); text-decoration: none; }
+.toc a:hover { color: var(--accent); }
+.callout-good {
+  background: linear-gradient(to right, #eaf3ec 0%, transparent 100%);
+  border-left: 4px solid var(--good);
+  padding: 0.7em 1em;
+  margin: 1em 0;
+}
+.callout-warn {
+  background: linear-gradient(to right, #f7eedd 0%, transparent 100%);
+  border-left: 4px solid var(--warn);
+  padding: 0.7em 1em;
+  margin: 1em 0;
+}
+hr {
+  border: none;
+  border-top: 1px dashed var(--rule);
+  margin: 2em 0;
+}
+</style>
+</head>
+<body>
+
+<header class="titleblock">
+  <h1>NexLM Quickstart Guide</h1>
+  <p class="subtitle">Train and benchmark three agents side-by-side:
+    <span class="tag-vanilla">Vanilla</span>
+    <span class="tag-v1">Frank&nbsp;v1</span>
+    <span class="tag-v2">Frank&nbsp;v2</span>
+  </p>
+  <p style="font-size: 0.85em; color: var(--soft);">
+    Repo: <code>github.com/roncyrthomas/NexLM</code> &nbsp;&middot;&nbsp;
+    Specs: <code>docs/superpowers/specs/2026-05-29-agent-layer-pivot.md</code>
+    + <code>2026-05-29-frank-v2-self-learning.md</code>
+  </p>
+</header>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#three-models">The three models at a glance</a></li>
+    <li><a href="#archs">Architecture details, side-by-side</a></li>
+    <li><a href="#install">Installation &amp; setup</a></li>
+    <li><a href="#quickstart">5-minute quickstart code</a></li>
+    <li><a href="#train">Training: data, hyperparams, procedure</a></li>
+    <li><a href="#bench">Benchmarks &amp; eval protocol</a></li>
+    <li><a href="#results">Results template</a></li>
+    <li><a href="#cost">Cost &amp; budget</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+  </ol>
+</div>
+
+<!-- =============================================================== -->
+<h2 id="three-models">The three models at a glance</h2>
+
+<table>
+  <tr>
+    <th>Model</th>
+    <th>Tiers active</th>
+    <th>Trainable params</th>
+    <th>Tests</th>
+    <th>What it isolates</th>
+  </tr>
+  <tr>
+    <td><span class="tag-vanilla">Vanilla</span></td>
+    <td>LoRA only</td>
+    <td>~3M (LoRA r=16 on Q/K/V/O)</td>
+    <td>Standard finetune control</td>
+    <td>The base model's own quality</td>
+  </tr>
+  <tr>
+    <td><span class="tag-v1">Frank v1</span></td>
+    <td>+ Hormones, Hebbian, HippoRAG, Titans, online-LoRA</td>
+    <td>~3M LoRA + ~15M Titans + ~3MB Hebbian</td>
+    <td>External-reward agent layer</td>
+    <td>Does our agent layer add value?</td>
+  </tr>
+  <tr>
+    <td><span class="tag-v2">Frank v2</span></td>
+    <td>+ Predictive, Episodic, Habits, Dreamer, Metaplastic</td>
+    <td>~3M LoRA + ~15M Titans + ~6MB sparse state</td>
+    <td>Self-derived learning signals</td>
+    <td>Do self-derived signals beat reward-only?</td>
+  </tr>
+</table>
+
+<div class="callout-good">
+<strong>The headline experiment</strong> is the (Frank v2 &minus; Frank v1) delta. That isolates the contribution of <em>self-learning</em> beyond external reward. The (Frank v1 &minus; Vanilla) delta confirms the agent layer itself helps.
+</div>
+
+<!-- =============================================================== -->
+<h2 id="archs">Architecture details, side-by-side</h2>
+
+<div class="figure">
+<svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg">
+  <!-- Title -->
+  <text x="450" y="20" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic">Figure 1. The three architectures, same base, increasing layer richness</text>
+
+  <!-- Three columns -->
+  <!-- VANILLA -->
+  <g font-family="Georgia" font-size="11">
+    <rect x="30" y="50" width="240" height="40" fill="#5a5a5a" rx="3"/>
+    <text x="150" y="76" text-anchor="middle" fill="white" font-weight="bold">VANILLA</text>
+
+    <rect x="30" y="110" width="240" height="60" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="150" y="135" text-anchor="middle">Frozen Base Model</text>
+    <text x="150" y="153" text-anchor="middle" font-size="10" fill="#5a5a5a">SmolLM2 / Phi-3</text>
+
+    <rect x="30" y="180" width="240" height="40" fill="#fff" stroke="#3a6b8b" stroke-width="2"/>
+    <text x="150" y="205" text-anchor="middle" fill="#3a6b8b" font-weight="bold">LoRA r=16</text>
+
+    <rect x="30" y="240" width="240" height="30" fill="#5a5a5a" opacity="0.15"/>
+    <text x="150" y="259" text-anchor="middle">(no other tiers)</text>
+
+    <text x="150" y="450" text-anchor="middle" font-size="10" font-style="italic" fill="#5a5a5a">~3M trainable</text>
+  </g>
+
+  <!-- FRANK V1 -->
+  <g font-family="Georgia" font-size="11">
+    <rect x="330" y="50" width="240" height="40" fill="#3a6b8b" rx="3"/>
+    <text x="450" y="76" text-anchor="middle" fill="white" font-weight="bold">FRANK v1</text>
+
+    <rect x="330" y="110" width="240" height="60" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="450" y="135" text-anchor="middle">Frozen Base Model</text>
+    <text x="450" y="153" text-anchor="middle" font-size="10" fill="#5a5a5a">SmolLM2 / Phi-3</text>
+
+    <rect x="330" y="180" width="240" height="40" fill="#fff" stroke="#3a6b8b" stroke-width="2"/>
+    <text x="450" y="205" text-anchor="middle" fill="#3a6b8b" font-weight="bold">LoRA r=16 + online updates</text>
+
+    <rect x="330" y="230" width="240" height="22" fill="#c97a7a" opacity="0.4"/>
+    <text x="450" y="246" text-anchor="middle" font-size="10">Tier 0a: Hormones (joy/frust/...)</text>
+
+    <rect x="330" y="254" width="240" height="22" fill="#c97a7a" opacity="0.25"/>
+    <text x="450" y="270" text-anchor="middle" font-size="10">Tier 0b: Hebbian H (850&times;850)</text>
+
+    <rect x="330" y="278" width="240" height="22" fill="#8b8d3a" opacity="0.4"/>
+    <text x="450" y="294" text-anchor="middle" font-size="10">Tier 1: HippoRAG graph + PPR</text>
+
+    <rect x="330" y="302" width="240" height="22" fill="#3a6b8b" opacity="0.4"/>
+    <text x="450" y="318" text-anchor="middle" font-size="10">Tier 2: Titans MAG (15M MLP)</text>
+
+    <text x="450" y="450" text-anchor="middle" font-size="10" font-style="italic" fill="#5a5a5a">+ 15M Titans + 3MB state</text>
+  </g>
+
+  <!-- FRANK V2 -->
+  <g font-family="Georgia" font-size="11">
+    <rect x="630" y="50" width="240" height="40" fill="#8b1e1e" rx="3"/>
+    <text x="750" y="76" text-anchor="middle" fill="white" font-weight="bold">FRANK v2</text>
+
+    <rect x="630" y="110" width="240" height="60" fill="#f4f1ea" stroke="#1a1a1a"/>
+    <text x="750" y="135" text-anchor="middle">Frozen Base Model</text>
+    <text x="750" y="153" text-anchor="middle" font-size="10" fill="#5a5a5a">SmolLM2 / Phi-3</text>
+
+    <rect x="630" y="180" width="240" height="40" fill="#fff" stroke="#3a6b8b" stroke-width="2"/>
+    <text x="750" y="205" text-anchor="middle" fill="#3a6b8b" font-weight="bold">LoRA + online + dreamer-trained</text>
+
+    <rect x="630" y="230" width="240" height="22" fill="#c97a7a" opacity="0.4"/>
+    <text x="750" y="246" text-anchor="middle" font-size="10">v1 Tier 0a + 0b + 1 + 2 (all)</text>
+
+    <rect x="630" y="254" width="240" height="22" fill="#8b1e1e" opacity="0.4"/>
+    <text x="750" y="270" text-anchor="middle" font-size="10">Tier P: Predictive (surprise)</text>
+
+    <rect x="630" y="278" width="240" height="22" fill="#8b1e1e" opacity="0.35"/>
+    <text x="750" y="294" text-anchor="middle" font-size="10">Tier E: Episodic KNN cache</text>
+
+    <rect x="630" y="302" width="240" height="22" fill="#8b1e1e" opacity="0.3"/>
+    <text x="750" y="318" text-anchor="middle" font-size="10">Tier H: Habits (compiled triples)</text>
+
+    <rect x="630" y="326" width="240" height="22" fill="#8b1e1e" opacity="0.25"/>
+    <text x="750" y="342" text-anchor="middle" font-size="10">Tier D: Dreamer (idle replay)</text>
+
+    <rect x="630" y="350" width="240" height="22" fill="#8b1e1e" opacity="0.2"/>
+    <text x="750" y="366" text-anchor="middle" font-size="10">Tier M: Metaplastic (&eta;[i,j])</text>
+
+    <text x="750" y="450" text-anchor="middle" font-size="10" font-style="italic" fill="#5a5a5a">+ all of v1 + 6MB v2 state</text>
+  </g>
+
+  <!-- bottom labels -->
+  <text x="150" y="290" text-anchor="middle" font-size="10" fill="#5a5a5a">External reward only</text>
+  <text x="450" y="345" text-anchor="middle" font-size="10" fill="#5a5a5a">External reward driven</text>
+  <text x="750" y="395" text-anchor="middle" font-size="10" fill="#5a5a5a">Self-derived signal driven</text>
+</svg>
+<p class="caption"><strong>Figure 1.</strong> Same frozen base, same LoRA, increasing layer richness. v1 adds five tiers reacting to user reward; v2 adds five more tiers driven by the system's own predictive error.</p>
+</div>
+
+<h3>2.1 &nbsp; Frank v1 tiers (already implemented)</h3>
+
+<table>
+  <tr><th>Tier</th><th>File</th><th>What it does</th><th>Param cost</th></tr>
+  <tr><td>0a</td><td><code>agent/hormones.py</code></td><td>5 EMAs (joy/frustration/confidence/fatigue/boredom) modulate LR, sampling temp, surprise thresholds, snapshot triggers.</td><td>~0 (5 floats)</td></tr>
+  <tr><td>0b</td><td><code>agent/hebbian.py</code></td><td>Dense 850&times;850 matrix; three-factor rule (pre&times;post&times;reward) builds task&harr;tool associations.</td><td>~3 MB</td></tr>
+  <tr><td>1</td><td><code>agent/hipporag.py</code></td><td>OpenIE-extracted knowledge graph; Personalized PageRank retrieval over query-entity seeds.</td><td>scales with docs</td></tr>
+  <tr><td>2</td><td><code>agent/titans.py</code></td><td>MLP with WK/WV projections; surprise-gated test-time updates; hooks into chosen base-model layers.</td><td>~15 M</td></tr>
+  <tr><td>3</td><td>PEFT LoRA in <code>wrapper.py</code></td><td>Rank-16 LoRA on Q/K/V/O; snapshot ring for rollback; sleep training nightly.</td><td>~3 M</td></tr>
+</table>
+
+<h3>2.2 &nbsp; Frank v2 tiers (newly added)</h3>
+
+<table>
+  <tr><th>Tier</th><th>File</th><th>What it does</th><th>Param cost</th></tr>
+  <tr><td>P</td><td><code>agent/predictive.py</code></td><td>Base model predicts next user input; surprise = &minus;log p(actual) normalized via EMA z-score &rarr; sigmoid. Feeds hormones <em>without</em> external reward.</td><td>0 (reuses base)</td></tr>
+  <tr><td>E</td><td><code>agent/episodic.py</code></td><td>Hash-embedding + scipy KDTree cache of (query, response, reward); KNN recall biases generation toward proven good responses.</td><td>~100 MB at 10k</td></tr>
+  <tr><td>H</td><td><code>agent/habits.py</code></td><td>Compiled (intent, tool, shape) triples bypass the generation loop entirely on familiar inputs. Frustration-inhibited.</td><td>~0 (sparse dict)</td></tr>
+  <tr><td>D</td><td><code>agent/dreamer.py</code></td><td>When fatigue high, sample episodes &rarr; replay through agent &rarr; LoRA gradient step on the predictive error.</td><td>0 new params</td></tr>
+  <tr><td>M</td><td><code>agent/metaplastic.py</code></td><td>Per-pair Hebbian learning rate; bumped up on retrospectively-useful updates, down on noisy ones.</td><td>~3 MB</td></tr>
+</table>
+
+<h3>2.3 &nbsp; The single-turn pipeline (Frank v2 order)</h3>
+
+<pre>1.  Habit bypass check        (v2) — compiled triple? Return cached response, skip gen.
+2.  Episodic recall            (v2) — KNN past similar; positive hits → few-shot hint.
+3.  HippoRAG retrieve          (v1) — KG retrieval, top-k chunks.
+4.  Tool descriptions          (v1) — catalogue rendering.
+5.  Hormone-modulated temp     (v1).
+6.  Predictive forecast        (v2) — cache p(next user input) for surprise scoring.
+7.  Generate.
+8.  Parse + return.
+
+After user reaction (observe_feedback):
+  - Predictive surprise from actual user message → feeds hormones.
+  - Hebbian update on active features (modulated by metaplastic η[i,j]).
+  - Episodic store.
+  - Habits observe + decay tick.
+  - Dreamer fires if fatigue ≥ threshold.</pre>
+
+<!-- =============================================================== -->
+<h2 id="install">Installation &amp; setup</h2>
+
+<h4>Local development (CPU/MPS/8GB GPU)</h4>
+
+<pre>git clone https://github.com/roncyrthomas/NexLM.git
+cd NexLM
+
+# Python 3.10-3.12, venv recommended
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+
+# Torch (pick the wheel for your GPU)
+pip install torch                                                          # CPU only
+# OR
+pip install torch --index-url https://download.pytorch.org/whl/cu124       # consumer GPU
+# OR
+pip install torch --index-url https://download.pytorch.org/whl/cu130       # RTX 50xx (Blackwell)
+
+pip install -r requirements.in
+pip install scipy networkx peft                                            # if not in requirements
+
+# Sanity check
+python -m pytest tests/ -v -m "not slow"     # should show 114 passed</pre>
+
+<h4>Cloud (Linux + A100/A10 + bitsandbytes)</h4>
+
+<pre>uv pip install torch --index-url https://download.pytorch.org/whl/cu124 --system
+uv pip install -r requirements.in --system
+uv pip install bitsandbytes --system          # 4-bit quantization for Phi-3-mini</pre>
+
+<!-- =============================================================== -->
+<h2 id="quickstart">5-minute quickstart code</h2>
+
+<h3>3.1 &nbsp; Instantiate all three agents</h3>
+
+<pre>from agent import AgentConfig, NexAgent
+
+# Same base model, three configurations
+vanilla  = NexAgent(AgentConfig.vanilla()).cuda()
+frank_v1 = NexAgent(AgentConfig.frank_v1()).cuda()
+frank_v2 = NexAgent(AgentConfig.frank_v2()).cuda()
+
+# Override the base if you want Phi-3-mini for the paper
+vanilla = NexAgent(AgentConfig.vanilla(base="microsoft/Phi-3-mini-4k-instruct")).cuda()</pre>
+
+<h3>3.2 &nbsp; Train all three with the same data</h3>
+
+<pre># From the command line
+python train/train_three.py \
+    --base smollm2 \
+    --variants vanilla,frank_v1,frank_v2 \
+    --steps 500 \
+    --dataset HuggingFaceH4/ultrachat_200k \
+    --batch_size 1 --grad_accum 8 --lr 2e-4 \
+    --out_root out/three_way \
+    --wandb</pre>
+
+<h3>3.3 &nbsp; Run the three-way comparison</h3>
+
+<pre>from evals.runner import compare_three
+
+results = compare_three(
+    vanilla=vanilla,
+    frank_v1=frank_v1,
+    frank_v2=frank_v2,
+    benchmarks=["bfcl", "musique", "trace"],
+    max_examples=100,
+)
+
+# results["delta_v1_vs_vanilla"]["bfcl"]["tool_match"]   # paper claim 1
+# results["delta_v2_vs_v1"]["trace"]["avg_accuracy"]     # paper claim 2 (key)
+# results["delta_v2_vs_v1"]["musique"]["exact_match"]    # paper claim 3</pre>
+
+<h3>3.4 &nbsp; A full interaction with feedback</h3>
+
+<pre># Set up tools + docs (optional)
+frank_v2.tools.register("get_weather", lambda city: f"Sunny in {city}",
+                        description="Get current weather",
+                        parameters={"type":"object","properties":{"city":{"type":"string"}}})
+
+frank_v2.hipporag.ingest_documents(
+    [("doc1", "Tokyo is the capital of Japan.")],
+    extractor=lambda text: [{"subject":"Tokyo","predicate":"is","object":"capital of Japan","confidence":0.9}],
+)
+
+# Single turn
+out = frank_v2.turn("What is the capital of Japan?", intent_id=42)
+print(out["response"])
+print(out["retrieved_chunks"])
+
+# Feedback loop — drives all the self-learning tiers
+frank_v2.observe_feedback(
+    reward=1.0,                  # user was happy
+    active_features=[42, 7],     # intent + tool ids that co-fired
+    last_user_query="What is the capital of Japan?",
+    last_response=out["response"],
+    next_user_message="Thanks!", # used for predictive surprise
+    intent_id=42, tool_id=7, shape_id=2,
+)</pre>
+
+<!-- =============================================================== -->
+<h2 id="train">Training: data, hyperparams, procedure</h2>
+
+<h3>4.1 &nbsp; Recommended datasets</h3>
+
+<table>
+  <tr><th>Stage</th><th>HuggingFace path</th><th>Size</th><th>License</th><th>Used for</th></tr>
+  <tr><td>General SFT</td><td><code>HuggingFaceH4/ultrachat_200k</code></td><td>~200k chats</td><td>MIT</td><td>Instruction following baseline</td></tr>
+  <tr><td>General SFT (alt)</td><td><code>HuggingFaceTB/smoltalk</code></td><td>~1.1M chats</td><td>Apache-2.0</td><td>Higher-quality alternative</td></tr>
+  <tr><td>Tool-calling SFT</td><td><code>glaiveai/glaive-function-calling-v2</code></td><td>~113k</td><td>Apache-2.0</td><td>For BFCL claim</td></tr>
+  <tr><td>Tool-calling SFT</td><td><code>NousResearch/hermes-function-calling-v1</code></td><td>~12k</td><td>Apache-2.0</td><td>Multi-turn tool</td></tr>
+  <tr><td>RAG SFT</td><td><code>nvidia/ChatRAG-Bench</code></td><td>~3k</td><td>Apache-2.0</td><td>For MuSiQue claim</td></tr>
+  <tr><td>Continual learning</td><td>TRACE (8 sequential tasks)</td><td>~10k per task</td><td>varies</td><td>For TRACE-BWT claim</td></tr>
+  <tr><td>DPO</td><td><code>HuggingFaceH4/ultrafeedback_binarized</code></td><td>~60k</td><td>MIT</td><td>Optional preference tuning</td></tr>
+</table>
+
+<h3>4.2 &nbsp; Recommended hyperparameters</h3>
+
+<table>
+  <tr><th>Hyperparam</th><th>Value</th><th>Notes</th></tr>
+  <tr><td>Base model</td><td>SmolLM2-1.7B local / Phi-3-mini cloud</td><td>SmolLM2 fits 8GB; Phi-3 needs 4-bit quant locally</td></tr>
+  <tr><td>LoRA rank</td><td>16</td><td>32 for cloud experiments if memory allows</td></tr>
+  <tr><td>LoRA &alpha;</td><td>32</td><td>2&times;rank, standard</td></tr>
+  <tr><td>LoRA target modules</td><td>q_proj, k_proj, v_proj, o_proj</td><td>For Phi-3: qkv_proj, o_proj (fused)</td></tr>
+  <tr><td>Learning rate</td><td>2e-4</td><td>LoRA tolerates higher LR than full FT</td></tr>
+  <tr><td>Batch size</td><td>1</td><td>With grad_accum 8 = effective 8</td></tr>
+  <tr><td>Gradient accum</td><td>8</td><td></td></tr>
+  <tr><td>Max seq len</td><td>1024</td><td>2048 on cloud A100</td></tr>
+  <tr><td>Steps</td><td>500&ndash;2000</td><td>500 for sanity, 2000 for paper-quality</td></tr>
+  <tr><td>Warmup</td><td>50 steps</td><td>10% of total</td></tr>
+  <tr><td>Weight decay</td><td>0.01</td><td></td></tr>
+  <tr><td>Grad clip</td><td>1.0</td><td></td></tr>
+  <tr><td>Precision</td><td>bfloat16</td><td>fp16 on older GPUs</td></tr>
+  <tr><td>v2 Episodic buffer</td><td>10,000</td><td>Auto-pruned by utility</td></tr>
+  <tr><td>v2 Habits compile threshold</td><td>10 turns</td><td>+ avg_reward &ge; 0.7</td></tr>
+  <tr><td>v2 Dream samples</td><td>64 per cycle</td><td>Fires when fatigue &ge; 0.7</td></tr>
+</table>
+
+<h3>4.3 &nbsp; Training procedure step by step</h3>
+
+<ol>
+  <li><strong>SFT on a shared corpus.</strong> All three agents see the same data, same step count, same hyperparams. This isolates the agent layer from data variance.</li>
+  <li><strong>(Frank v1, v2 only) prime the agent layer with simulated feedback.</strong> Stream a few hundred annotated examples through <code>observe_feedback()</code> so the Hebbian H and (v2) episodic memory have some content.</li>
+  <li><strong>(Frank v2 only) let it dream once.</strong> Force <code>dreamer.dream(agent)</code> to run a single consolidation pass before evaluation.</li>
+  <li><strong>Run the three-way compare on the held-out benchmark splits.</strong> 3 seeds &times; 200 examples each.</li>
+  <li><strong>Tabulate the deltas.</strong> Per benchmark, per metric.</li>
+</ol>
+
+<!-- =============================================================== -->
+<h2 id="bench">Benchmarks &amp; eval protocol</h2>
+
+<table>
+  <tr><th>Benchmark</th><th>File</th><th>Primary metric</th><th>What it tests</th><th>HF path</th></tr>
+  <tr><td>BFCL v3</td><td><code>evals/bfcl.py</code></td><td>tool_match, format_score</td><td>Right tool choice + right JSON arguments</td><td><code>gorilla-llm/Berkeley-Function-Calling-Leaderboard</code></td></tr>
+  <tr><td>MuSiQue</td><td><code>evals/musique.py</code></td><td>exact_match</td><td>Multi-hop QA — exercises HippoRAG + Titans</td><td><code>dgslibisey/MuSiQue</code></td></tr>
+  <tr><td>TRACE</td><td><code>evals/trace.py</code></td><td>avg_accuracy, BWT (forgetting)</td><td>Continual learning across 8 tasks — exercises hormones + dreamer</td><td><code>BeyonderXX/TRACE-Benchmark</code></td></tr>
+</table>
+
+<h4>Custom probes the harness supports</h4>
+
+<ul>
+  <li><strong>Latency comparison</strong> — measure first-token latency under all three models. v2 should be 30&ndash;50% faster on familiar inputs (habits bypass).</li>
+  <li><strong>Forgetting probe</strong> — after 1000 turns of TRACE, retest task 1 accuracy. v2 should retain it; v1 should drift.</li>
+  <li><strong>Predictive surprise distribution</strong> — log surprise per turn over time; sharpens for v2 as it adapts.</li>
+</ul>
+
+<h4>Predictions baked into the v2 spec (what we expect to see)</h4>
+
+<table>
+  <tr><th>Benchmark</th><th>(v1 &minus; vanilla)</th><th>(v2 &minus; v1)</th></tr>
+  <tr><td>BFCL tool_match</td><td>+5 to +15 pp</td><td>+3 to +8 pp</td></tr>
+  <tr><td>MuSiQue EM</td><td>+3 to +10 pp</td><td>+1 to +4 pp</td></tr>
+  <tr><td>TRACE avg_acc</td><td>+5 to +15 pp</td><td>+5 to +15 pp</td></tr>
+  <tr><td>TRACE BWT (forgetting reduction)</td><td>small</td><td><strong>large &mdash; most diagnostic</strong></td></tr>
+  <tr><td>First-token latency on compiled tasks</td><td>+5&ndash;10% slower</td><td><strong>&minus;40% faster</strong></td></tr>
+</table>
+
+<!-- =============================================================== -->
+<h2 id="results">Results template</h2>
+
+<p>Fill this in after running the three-way compare. The JSON the runner writes to <code>evals/results/compare_three.json</code> maps 1:1 to this table.</p>
+
+<table>
+  <tr><th>Benchmark</th><th>Metric</th><th><span class="tag-vanilla">Vanilla</span></th><th><span class="tag-v1">Frank v1</span></th><th><span class="tag-v2">Frank v2</span></th><th>&Delta;(v1&minus;Van)</th><th>&Delta;(v2&minus;v1)</th></tr>
+  <tr><td>BFCL</td><td>format_score</td><td>__.__</td><td>__.__</td><td>__.__</td><td>__</td><td>__</td></tr>
+  <tr><td>BFCL</td><td>tool_match</td><td>__.__</td><td>__.__</td><td>__.__</td><td>__</td><td>__</td></tr>
+  <tr><td>MuSiQue</td><td>exact_match</td><td>__.__</td><td>__.__</td><td>__.__</td><td>__</td><td>__</td></tr>
+  <tr><td>TRACE</td><td>avg_accuracy</td><td>__.__</td><td>__.__</td><td>__.__</td><td>__</td><td>__</td></tr>
+  <tr><td>TRACE</td><td>BWT (negative is forgetting)</td><td>__.__</td><td>__.__</td><td>__.__</td><td>__</td><td>__</td></tr>
+  <tr><td>Latency</td><td>first-token ms (compiled habits)</td><td>__</td><td>__</td><td>__</td><td>__</td><td>__</td></tr>
+</table>
+
+<!-- =============================================================== -->
+<h2 id="cost">Cost &amp; budget</h2>
+
+<table>
+  <tr><th>Stage</th><th>Hardware</th><th>Time</th><th>Cost</th></tr>
+  <tr><td>Local sanity (114 tests)</td><td>CPU or any GPU</td><td>30 sec</td><td>$0</td></tr>
+  <tr><td>Quickstart 500-step train, three models</td><td>1&times;A10 / 1&times;A100</td><td>~3 h</td><td>~$3&ndash;5</td></tr>
+  <tr><td>Paper-quality train (2k steps each)</td><td>1&times;A100</td><td>~9 h</td><td>~$15&ndash;25</td></tr>
+  <tr><td>Three-way eval (BFCL + MuSiQue + TRACE @ 200 examples &times; 3 seeds)</td><td>1&times;A100</td><td>~6 h</td><td>~$10</td></tr>
+  <tr><td><strong>Full paper experiments</strong></td><td>&nbsp;</td><td>&nbsp;</td><td><strong>~$50&ndash;100</strong></td></tr>
+</table>
+
+<div class="callout-good">
+This stays comfortably within the ~$250 envelope set in the agent-layer-pivot spec.
+</div>
+
+<!-- =============================================================== -->
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h4>"OutOfMemoryError" loading Phi-3-mini locally</h4>
+<p>Phi-3-mini is 3.8B params. On a 5060-class GPU, switch to SmolLM2-1.7B for local dev:</p>
+<pre>cfg = AgentConfig.frank_v2(base="HuggingFaceTB/SmolLM2-1.7B-Instruct")</pre>
+<p>Or on cloud with bitsandbytes: <code>cfg.quantization = "4bit"</code>.</p>
+
+<h4>"ModuleNotFoundError: No module named 'mamba_ssm'"</h4>
+<p>You don't need it for any of v1 or v2. The mamba/diff-attn backbone (M1a/M1b) was the original architecture path; the pivoted agent layer uses any pretrained base. If something tries to import it, you're on M1a code by accident.</p>
+
+<h4>HF Hub rate-limiting</h4>
+<p>Set an HF_TOKEN: <code>export HF_TOKEN=hf_xxx</code>. Without it, downloads are slower and may fail for large datasets.</p>
+
+<h4>"undefined symbol" from causal_conv1d / mamba_ssm on cloud</h4>
+<p>ABI mismatch — torch was upgraded after those packages compiled. Uninstall both: <code>pip uninstall -y mamba-ssm causal-conv1d</code>. The agent layer doesn't need them.</p>
+
+<h4>Wandb keeps asking for API key</h4>
+<p><code>wandb login</code> once; key cached at <code>~/.netrc</code>.</p>
+
+<h4>compare_three returns empty deltas</h4>
+<p>The benchmark fell back to inline 3&ndash;4 examples. Check <code>results["vanilla"]["bfcl"]["source"]</code> — if it says <code>inline_fallback</code>, HF dataset load failed. Try setting <code>HF_TOKEN</code> or pre-downloading via <code>datasets-cli</code>.</p>
+
+<hr>
+
+<p style="font-size: 0.85em; color: var(--soft); text-align: center; font-style: italic;">
+NexLM project &middot; v0.3 &middot; 2026-05-29 &middot;
+Three-way comparison harness ready for cloud experiments.
+</p>
+
+</body>
+</html>
